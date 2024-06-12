@@ -1,0 +1,24 @@
+name: ci
+
+on:
+  schedule:
+    - cron: '0 0,12 * * *'
+
+env:
+  DIRECT_URL: ${{secrets.DIRECT_URL}}
+  DATABASE_URL: ${{secrets.DATABASE_URL}}
+  MAIL_AUTH_USER: ${{secrets.MAIL_AUTH_USER}}
+  MAIL_AUTH_PASS: ${{secrets.MAIL_AUTH_PASS}}
+
+jobs:
+  Claim:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install NPM Packages
+        run: npm install
+      - name: Install Playwright Browser with Dependencies
+        run: npx -y playwright install firefox --with-deps
+      - name: Claim
+        run: npm start
