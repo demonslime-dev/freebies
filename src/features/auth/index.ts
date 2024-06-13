@@ -4,9 +4,9 @@ import { loginToUnityAssetStore } from '@/features/auth/unityassetstore.auth.js'
 import { loginToUnrealMarketPlace } from '@/features/auth/unrealmarketplace.auth.js';
 import { ProductType } from '@prisma/client';
 
-const name = "";
-const email = "";
-const password = "";
+const name = process.env.AUTH_NAME;
+const email = process.env.AUTH_EMAIL;
+const password = process.env.AUTH_PASSWORD;
 
 const { id: userId } = await prisma.user.upsert({
     where: { email },

@@ -5,9 +5,30 @@ import { notifyFailure, notifySuccess } from '@/common/notifier.js';
 import { claimFromItchDotIo } from '@/features/claimer/itchdotio.claimer.js';
 import { claimFromUnityAssetStore } from '@/features/claimer/unityassetstore.claimer.js';
 import { claimFromUnrealMarketplace } from '@/features/claimer/unrealmarketplace.claimer.js';
-import { groupedProducts } from '@/features/scraper/index.js';
 import { ProductType } from '@prisma/client';
 import { noTryAsync } from 'no-try';
+
+const products = await prisma.product.findMany({ where: { saleEndDate: { gt: new Date() } } });
+
+const groupedProducts: Record<ProductType, typeof products> = {
+    [ProductType.Itch]: [],
+    [ProductType.Unity]: [],
+    [ProductType.Unreal]: [],
+}
+
+for (const product of products) {
+    switch (true) {
+        case /^https:\/\/.+\.itch\.io/.test(product.url):
+            groupedProducts[ProductType.Itch].push(product);
+            break;
+        case /^https:\/\/assetstore\.unity\.com/.test(product.url):
+            groupedProducts[ProductType.Unity].push(product);
+            break;
+        case /^https:\/\/www\.unrealengine\.com/.test(product.url):
+            groupedProducts[ProductType.Unreal].push(product);
+            break;
+    }
+}
 
 const users = await prisma.user.findMany({ include: { productEntries: true } });
 

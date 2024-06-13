@@ -3,7 +3,6 @@ import logger, { logError } from '@/common/logger.js';
 import { getFreeAlbumsFromItchDotIo, getFreeAssetsFromItchDotIo } from '@/features/scraper/itchdotio.scraper.js';
 import { getFreeAssetsFromUnityAssetStore } from '@/features/scraper/unityassetstore.scraper.js';
 import { getFreeAssetsFromUnrealMarketPlace } from '@/features/scraper/unrealmarketplace.scraper.js';
-import { Prisma, ProductType } from '@prisma/client';
 import { noTryAsync } from 'no-try';
 
 logger.info("Loading assets from itch.io");
@@ -26,10 +25,4 @@ for (const product of products) {
         update: {},
         create: product,
     }), logError)
-}
-
-export const groupedProducts: Record<ProductType, Prisma.ProductCreateInput[]> = {
-    [ProductType.Itch]: freeAssetsFromItchDotIo.concat(freeAlbumsFromItchDotIo),
-    [ProductType.Unity]: freeAssetsFromUnityAssetStore,
-    [ProductType.Unreal]: freeAssetsFromUnrealMarketplace
 }

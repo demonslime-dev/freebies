@@ -1,0 +1,24 @@
+name: Auth
+
+on:
+  workflow_dispatch:
+
+env:
+  DIRECT_URL: ${{secrets.DIRECT_URL}}
+  DATABASE_URL: ${{secrets.DATABASE_URL}}
+  AUTH_NAME: ${{secrets.AUTH_NAME}}
+  AUTH_EMAIL: ${{secrets.AUTH_EMAIL}}
+  AUTH_PASSWORD: ${{secrets.AUTH_PASSWORD}}
+
+jobs:
+  Auth:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install NPM Packages
+        run: npm install
+      - name: Install Playwright Browser with Dependencies
+        run: npx -y playwright install firefox --with-deps
+      - name: Authenticate
+        run: npm run auth

@@ -8,10 +8,9 @@
   "type": "module",
   "keywords": [],
   "scripts": {
-    "start": "npm run claim",
     "auth": "tsx src/features/auth",
     "claim": "tsx src/features/claimer",
-    "scraper": "tsx src/features/scraper",
+    "scrape": "tsx src/features/scraper",
     "db:push": "prisma db push --force-reset --accept-data-loss",
     "db:studio": "prisma studio"
   },
@@ -19,6 +18,7 @@
     "@faker-js/faker": "^8.4.1",
     "@prisma/client": "^5.14.0",
     "axios": "^1.6.8",
+    "commander": "^12.1.0",
     "cron": "^3.1.7",
     "express": "^5.0.0-beta.3",
     "jose": "^5.3.0",
