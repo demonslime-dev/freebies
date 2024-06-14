@@ -1,5 +1,6 @@
 import { AlreadyClaimedError, UnauthorizedError } from '@/common/errors.js';
 import logger from '@/common/logger.js';
+import { isLoggedInToUnrealMarketplace } from '@/features/auth/unrealmarketplace.auth.js';
 import { BrowserContext } from 'playwright';
 
 export async function claimFromUnrealMarketplace(url: string, context: BrowserContext) {
@@ -8,8 +9,7 @@ export async function claimFromUnrealMarketplace(url: string, context: BrowserCo
         logger.info('Navigating to product page');
         await page.goto(url, { waitUntil: 'networkidle' });
 
-        logger.info('Checking for authentication state');
-        if (!await page.locator('unrealengine-navigation[isloggedin="true"]').isVisible()) throw new UnauthorizedError();
+        if (!await isLoggedInToUnrealMarketplace(context)) throw new UnauthorizedError();
         if (await page.getByRole('link', { name: 'Open in Launcher' }).isVisible()) throw new AlreadyClaimedError();
 
         logger.info('Claiming');

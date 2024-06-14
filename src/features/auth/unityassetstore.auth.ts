@@ -1,6 +1,7 @@
 import { createBrowserContext } from '@/common/browser.js';
 import logger from '@/common/logger.js';
 import { authenticator } from 'otplib';
+import { BrowserContext } from 'playwright';
 
 export async function loginToUnityAssetStore(email: string, password: string, authSecret: string | null): Promise<PrismaJson.StorageState> {
     const context = await createBrowserContext({ cookies: [], origins: [] });
@@ -30,4 +31,15 @@ export async function loginToUnityAssetStore(email: string, password: string, au
         logger.info('Logged in successfully');
         return await context.storageState();
     } finally { await context.browser()?.close(); }
+}
+
+export async function isLoggedInToUnityAssetStore(context: BrowserContext) {
+    logger.info('Checking authentication state for unityassetstore');
+    const page = await context.newPage();
+
+    try {
+        await page.goto('https://assetstore.unity.com/');
+        await page.locator('[data-test="avatar"]').click();
+        return await page.locator('#profile-option').isVisible();
+    } finally { await page.close(); }
 }

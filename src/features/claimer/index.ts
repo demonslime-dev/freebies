@@ -1,8 +1,9 @@
 import { createBrowserContext } from '@/common/browser.js';
 import prisma from '@/common/database.js';
 import { AlreadyClaimedError } from '@/common/errors.js';
-import logger, { logError } from '@/common/logger.js';
+import { logError } from '@/common/logger.js';
 import { notifyFailure, notifySuccess } from '@/common/notifier.js';
+import { authenticateAndSaveStorageState, getAuthChecker } from '@/features/auth/index.js';
 import { claimFromItchDotIo } from '@/features/claimer/itchdotio.claimer.js';
 import { claimFromUnityAssetStore } from '@/features/claimer/unityassetstore.claimer.js';
 import { claimFromUnrealMarketplace } from '@/features/claimer/unrealmarketplace.claimer.js';
@@ -33,19 +34,32 @@ for (const product of products) {
 
 const users = await prisma.user.findMany({ include: { productEntries: true } });
 
-for (const user of users) {
-    const userLogger = logger.child({ userID: user.id });
+for (const { productEntries, ...user } of users) {
+    for (const { productType, storageState, authSecret } of productEntries) {
+        let context = await createBrowserContext(storageState);
 
-    userLogger.info('Checking for auth sessions');
-    for (const { productType, storageState } of user.productEntries) {
-        const sessionLogger = userLogger.child({ productType })
-        const context = await createBrowserContext(storageState);
+        const authenticate = () => authenticateAndSaveStorageState({ user, authSecret, productType });
+        const isAuthenticated = getAuthChecker(productType);
+
+        if (!await isAuthenticated(context)) {
+            context.browser()?.close();
+
+            const [error] = await noTryAsync(authenticate, logError);
+            if (error) continue;
+
+            const { storageState } = await prisma.productEntry.findUniqueOrThrow({
+                where: { id: { userId: user.id, productType } },
+                select: { storageState: true }
+            });
+
+            context = await createBrowserContext(storageState);
+        }
+
         const assets = groupedProducts[productType];
-        const claimer = getClaimer(productType);
+        const claim = getClaimer(productType);
 
-        sessionLogger.info('Claiming products');
         for (const product of assets) {
-            const [error] = await noTryAsync(() => claimer(product.url, context), logError);
+            const [error] = await noTryAsync(() => claim(product.url, context), logError);
             if (!error) await noTryAsync(() => notifySuccess(user.email, product), logError);
             else {
                 if (error instanceof AlreadyClaimedError) continue;

@@ -1,6 +1,6 @@
-import { createBrowserContext } from "@/common/browser.js";
 import { AlreadyClaimedError, UnauthorizedError } from '@/common/errors.js';
 import logger from "@/common/logger.js";
+import { isLoggedInToUnityAssetStore } from '@/features/auth/unityassetstore.auth.js';
 import { BrowserContext } from 'playwright';
 
 export async function claimFromUnityAssetStore(url: string, context: BrowserContext) {
@@ -9,11 +9,7 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
         logger.info('Navigating to product page');
         await page.goto(url, { waitUntil: 'networkidle' });
 
-        logger.info('Checking for authentication state');
-        await page.locator('[data-test="avatar"]').click();
-        if (await page.locator('#login-action').isVisible()) throw new UnauthorizedError();
-        await page.locator('[data-test="avatar"]').click();
-
+        if (!await isLoggedInToUnityAssetStore(context)) throw new UnauthorizedError();
         if (await page.getByRole('button', { name: 'Open in Unity' }).isVisible()) throw new AlreadyClaimedError();
 
         await page.getByRole('button', { name: 'Buy Now' }).click();
@@ -31,7 +27,7 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
         await page.locator('[for="vatRegisteredNo"]').click();
         await page.locator('label[for="order_terms"]:visible').click();
         logger.info('Getting coupon code');
-        const couponCode = await getCouponCode();
+        const couponCode = await getCouponCode(context);
         await page.locator('.summary-coupon input:visible').fill(couponCode);
         logger.info('Applying coupon code');
         await page.locator('.summary-coupon button:visible').click();
@@ -42,15 +38,15 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
     } finally { await page.close(); }
 }
 
-async function getCouponCode() {
-    const context = await createBrowserContext();
+async function getCouponCode(context: BrowserContext) {
+    const page = await context.newPage();
+
     try {
-        const page = await context.newPage();
         await page.goto('https://assetstore.unity.com/publisher-sale');
 
         const text = await page.getByText('enter the coupon code').innerText();
         const [_, couponCode] = /enter the coupon code (\w+)/.exec(text)!;
 
         return couponCode;
-    } finally { await context.browser()?.close(); }
+    } finally { await page.close(); }
 }
