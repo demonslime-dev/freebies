@@ -10,6 +10,7 @@ export async function loginToUnrealMarketPlace(email: string, password: string, 
         await page.goto('https://www.unrealengine.com/id/login?lang=en_US');
         logger.info('Filling login credentials');
         await page.fill('#email', email);
+        // TODO: Bypass or solve captcha
         await page.click('button[type=submit]');
         await page.fill('#password', password);
         logger.info('Logging in');

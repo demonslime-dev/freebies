@@ -9,27 +9,29 @@ export async function getFreeAssetsFromUnrealMarketPlace(): Promise<Prisma.Produ
     const assetsUrl = 'https://www.unrealengine.com/marketplace/en-US/assets?count=20&sortBy=effectiveDate&sortDir=DESC&start=0&tag=4910';
     const context = await createBrowserContext();
     try {
+        logger.info(`Getting free products from ${assetsUrl}`);
         const page = await context.newPage();
-        logger.info('Navigating to products page');
         await page.goto(assetsUrl, { waitUntil: 'networkidle' });
+        await page.waitForTimeout(5000);
+
         const freeAssetLocators = await page.locator('article.asset').all();
         logger.info(`${freeAssetLocators.length} free products found`);
-        return await freeAssetLocators.reduce(reduceCallbackFunc, Promise.resolve([]));
+
+        const products: Prisma.ProductCreateInput[] = [];
+        for (let i = 0; i < freeAssetLocators.length; i++) {
+            logger.info(`${i + 1}/${freeAssetLocators.length} Getting product details`);
+            const [error, product] = await noTryAsync(() => getProduct(freeAssetLocators[i]));
+
+            if (!product) {
+                logger.error(error, 'Unable to retrieve product details');
+                continue;
+            }
+
+            products.push(product);
+        }
+
+        return products;
     } finally { await context.browser()?.close(); }
-}
-
-async function reduceCallbackFunc(prev: Promise<Prisma.ProductCreateInput[]>, curr: Locator): Promise<Prisma.ProductCreateInput[]> {
-    const prevValue = await prev;
-
-    const [error, product] = await noTryAsync(() => getProduct(curr));
-
-    if (!product) {
-        logger.error(error, 'Unable to retrieve product details');
-        return prevValue;
-    }
-
-    prevValue.push(product);
-    return prevValue;
 }
 
 async function getProduct(containerLocator: Locator): Promise<Prisma.ProductCreateInput> {
@@ -40,7 +42,6 @@ async function getProduct(containerLocator: Locator): Promise<Prisma.ProductCrea
     const url = `https://www.unrealengine.com${productUrl}`;
 
     const title = await titleLocator.textContent();
-    logger.info(`Getting product ${title}`);
     if (!title) throw new ProductPropertyNotFoundError('title');
 
     const imgUrl = await containerLocator.locator('.image-box img').getAttribute('src');

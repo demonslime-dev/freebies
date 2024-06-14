@@ -7,12 +7,9 @@ export const createBrowserContext = async (storageState?: PrismaJson.StorageStat
     const server = process.env.PROXY_SERVER;
     const proxy = server && storageState ? { server } : undefined;
 
-    const context = await browser.newContext({
+    return await browser.newContext({
         ...devices['Desktop Firefox'],
         storageState: storageState ?? undefined,
         proxy
     });
-
-    context.setDefaultNavigationTimeout(60 * 1000);
-    return context;
 }

@@ -7,11 +7,11 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<Prisma.Product
     const assetUrl = 'https://assetstore.unity.com/publisher-sale';
     const context = await createBrowserContext();
     try {
+        logger.info(`Getting free products from ${assetUrl}`);
         const page = await context.newPage();
-        logger.info('Navigating to publisher sale page');
         await page.goto(assetUrl, { waitUntil: 'domcontentloaded', });
 
-        logger.info('Getting product url');
+        logger.info('Getting product URL');
         const getYourGiftLocator = page.getByRole('link', { name: 'Get your gift' });
         const url = await getYourGiftLocator.getAttribute('href');
         if (!url) throw new ProductPropertyNotFoundError('url');
@@ -31,8 +31,6 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<Prisma.Product
         const regex = /(\w+)\s(\d+),\s(\d+)\sat\s(\d+:\d+)(am|pm)\s(\w+)/i;
         const [_1, month, date, year, time, modifier, timezone] = regex.exec(endTimeText)!;
         const dateString = `${month} ${date}, ${year} ${convertTo24HourFormat(time, modifier)} ${timezone.replace('PT', 'GMT-0700')}`;
-
-        logger.info('Product details retrieved successfully');
 
         return [{
             url: url,

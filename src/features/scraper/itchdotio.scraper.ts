@@ -3,7 +3,7 @@ import { ProductPropertyNotFoundError } from '@/common/errors.js';
 import logger from "@/common/logger.js";
 import { Prisma } from '@prisma/client';
 import { noTryAsync } from 'no-try';
-import { Locator } from 'playwright';
+import { BrowserContext } from 'playwright';
 
 type AlbumsSaleUrl = 'https://itch.io/soundtracks/on-sale';
 type AssetsSaleUrl = 'https://itch.io/game-assets/on-sale';
@@ -24,11 +24,8 @@ export async function getFreeGamesFromItchDotIo() {
 }
 
 export async function getFreeProductsFromItchDotIo() {
-    logger.info('Getting free assets');
     const freeAssets = await getFreeAssetsFromItchDotIo();
-    logger.info('Getting free albums & sounds');
     const freeAlbums = await getFreeAlbumsFromItchDotIo();
-    logger.info('Getting free games');
     const freeGames = await getFreeGamesFromItchDotIo();
 
     return [...freeAssets, ...freeAlbums, ...freeGames];
@@ -38,8 +35,8 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<Prisma.P
     const context = await createBrowserContext();
 
     try {
+        logger.info(`Getting free products from ${productSaleUrl}`);
         const page = await context.newPage();
-        logger.info("Navigating to products page")
         await page.goto(productSaleUrl);
         const productsFound = await page.locator('.game_count').first().innerText();
         const match = productsFound.match(/(\d+,?)+/);
@@ -62,44 +59,58 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<Prisma.P
 
         const freeAssetLocators = await productsLocator.filter({ has: page.getByText('-100%') }).all();
         logger.info(`${freeAssetLocators.length} free products found`);
-        return await freeAssetLocators.reduce(reduceToProductsCallback, Promise.resolve([]));
+
+        const productUrls: string[] = [];
+        for (let i = 0; i < freeAssetLocators.length; i++) {
+            logger.info(`${i + 1}/${freeAssetLocators.length} Getting free product URL`);
+            const productUrlLocator = freeAssetLocators[i].locator('.title.game_link');
+            const [error, productUrl] = await noTryAsync(() => productUrlLocator.getAttribute('href'));
+
+            if (!productUrl) {
+                logger.error(error, 'Unable to retrieve product URL');
+                continue;
+            }
+
+            productUrls.push(productUrl);
+        }
+
+        await page.close();
+        const products: Prisma.ProductCreateInput[] = [];
+        for (let i = 0; i < productUrls.length; i++) {
+            logger.info(`${i + 1}/${productUrls.length} Getting product details for ${productUrls[i]}`);
+            const [error, product] = await noTryAsync(() => getProduct(context, productUrls[i]));
+
+            if (!product) {
+                logger.error(error, 'Unable to retrieve product details');
+                continue;
+            }
+
+            products.push(product);
+        }
+
+        return products;
     } finally { await context.browser()?.close(); }
 }
 
-async function reduceToProductsCallback(prev: Promise<Prisma.ProductCreateInput[]>, curr: Locator): Promise<Prisma.ProductCreateInput[]> {
-    const prevValue = await prev;
-
-    logger.info('Getting product url');
-    const getHrefAttribute = () => curr.locator('.title.game_link').getAttribute('href');
-    const [error, productUrl] = await noTryAsync(getHrefAttribute);
-
-    if (!productUrl) {
-        logger.error(error, 'Unable to retrieve product url');
-        return prevValue;
-    }
-
-    logger.info('Getting product details');
-    const [error1, product] = await noTryAsync(() => getProduct(productUrl));
-
-    if (!product) {
-        logger.error(error1, 'Unable to retrieve product details');
-        return prevValue;
-    }
-
-    prevValue.push(product);
-    return prevValue;
-}
-
-async function getProduct(url: string): Promise<Prisma.ProductCreateInput> {
-    const context = await createBrowserContext();
+async function getProduct(context: BrowserContext, url: string): Promise<Prisma.ProductCreateInput> {
+    const page = await context.newPage();
     try {
-        const page = await context.newPage();
         await page.goto(url, { waitUntil: 'domcontentloaded' });
 
         const title = await page.title();
         const imageLocators = await page.locator('.screenshot_list > a').all();
 
-        const images = await imageLocators.reduce(reduceToImageUrlsCallback, Promise.resolve([]));
+        const images: string[] = [];
+        for (const imageLocator of imageLocators) {
+            const [error, imageUrl] = await noTryAsync(() => imageLocator.getAttribute('href'));
+
+            if (!imageUrl) {
+                logger.error(error, 'Unable to retrieve product image');
+                continue;
+            }
+
+            images.push(imageUrl);
+        }
 
         const getDateString = async () => {
             await page.getByText('Download or claim').locator('visible=true').first().click({ timeout: 1000 });
@@ -107,27 +118,8 @@ async function getProduct(url: string): Promise<Prisma.ProductCreateInput> {
         };
 
         const [error, date] = await noTryAsync(() => getDateString());
-
         if (!date) throw new ProductPropertyNotFoundError('saleEndDate', { cause: error });
 
-        return {
-            url,
-            title,
-            images,
-            saleEndDate: new Date(date.split(' ')[0]),
-        };
-    } finally { await context.browser()?.close(); }
-}
-
-async function reduceToImageUrlsCallback(prev: Promise<string[]>, curr: Locator): Promise<string[]> {
-    const prevValue = await prev;
-    const [error, imageUrl] = await noTryAsync(() => curr.getAttribute('href'));
-
-    if (!imageUrl) {
-        logger.error(error, 'Unable to retrieve product image');
-        return prevValue;
-    }
-
-    prevValue.push(imageUrl);
-    return prevValue;
+        return { url, title, images, saleEndDate: new Date(date.split(' ')[0]) };
+    } finally { await page.close() }
 }

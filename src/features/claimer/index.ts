@@ -6,17 +6,14 @@ import { claimFromItchDotIo } from '@/features/claimer/itchdotio.claimer.js';
 import { claimFromUnityAssetStore } from '@/features/claimer/unityassetstore.claimer.js';
 import { claimFromUnrealMarketplace } from '@/features/claimer/unrealmarketplace.claimer.js';
 import { ProductType } from '@prisma/client';
-import { configDotenv } from 'dotenv';
 import { noTryAsync } from 'no-try';
-
-configDotenv();
 
 const products = await prisma.product.findMany({ where: { saleEndDate: { gt: new Date() } } });
 
 const groupedProducts: Record<ProductType, typeof products> = {
-    [ProductType.Itch]: [],
-    [ProductType.Unity]: [],
     [ProductType.Unreal]: [],
+    [ProductType.Unity]: [],
+    [ProductType.Itch]: []
 }
 
 for (const product of products) {
