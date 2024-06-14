@@ -13,6 +13,6 @@ export const createBrowserContext = async (storageState?: PrismaJson.StorageStat
         proxy
     });
 
-    context.setDefaultNavigationTimeout(10 * 60 * 1000);
+    context.setDefaultNavigationTimeout(60 * 1000);
     return context;
 }

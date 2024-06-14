@@ -1,5 +1,6 @@
 import { createBrowserContext } from '@/common/browser.js';
 import logger from '@/common/logger.js';
+import { authenticator } from 'otplib';
 
 export async function loginToUnityAssetStore(email: string, password: string, authSecret: string | null): Promise<PrismaJson.StorageState> {
     const context = await createBrowserContext({ cookies: [], origins: [] });
@@ -12,6 +13,18 @@ export async function loginToUnityAssetStore(email: string, password: string, au
         await page.getByLabel('Password').fill(password);
         logger.info('Logging in');
         await page.click('input[type=submit]');
+        await page.waitForLoadState('load');
+        const pageTitle = await page.title();
+
+        if (pageTitle.includes("Verify your code")) {
+            if (authSecret) {
+                logger.info('Entering 2FA code');
+                const otp = authenticator.generate(authSecret);
+                await page.fill('input.verify_code', otp);
+                await page.click('input[type=submit]');
+            } else throw new Error("OTP required");
+        }
+
         logger.info('Waiting for redirect after logging in');
         await page.waitForURL('https://id.unity.com/en/account/edit');
         logger.info('Logged in successfully');
