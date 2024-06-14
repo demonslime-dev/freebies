@@ -1,6 +1,6 @@
 import { devices, firefox } from 'playwright';
 
-const launchBrowser = async () => await firefox.launch({ headless: false });
+const launchBrowser = async () => await firefox.launch({ headless: true });
 
 export const createBrowserContext = async (storageState?: PrismaJson.StorageState | null) => {
     const browser = await launchBrowser();
