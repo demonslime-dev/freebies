@@ -6,9 +6,6 @@ on:
 env:
   DIRECT_URL: ${{secrets.DIRECT_URL}}
   DATABASE_URL: ${{secrets.DATABASE_URL}}
-  AUTH_NAME: ${{secrets.AUTH_NAME}}
-  AUTH_EMAIL: ${{secrets.AUTH_EMAIL}}
-  AUTH_PASSWORD: ${{secrets.AUTH_PASSWORD}}
 
 jobs:
   Auth:

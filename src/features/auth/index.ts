@@ -1,35 +1,28 @@
 import prisma from '@/common/database.js';
+import logger from '@/common/logger.js';
 import { loginToItchDotIo } from '@/features/auth/itchdotio.auth.js';
 import { loginToUnityAssetStore } from '@/features/auth/unityassetstore.auth.js';
 import { loginToUnrealMarketPlace } from '@/features/auth/unrealmarketplace.auth.js';
 import { ProductType } from '@prisma/client';
+import { noTryAsync } from 'no-try';
 
-const name = process.env.AUTH_NAME;
-const email = process.env.AUTH_EMAIL;
-const password = process.env.AUTH_PASSWORD;
+const users = await prisma.user.findMany({ include: { productEntries: true } });
 
-const { id: userId } = await prisma.user.upsert({
-    where: { email },
-    create: {
-        name,
-        email,
-        password
-    },
-    update: {
-        name,
-        password
-    },
-});
+for (const { id: userId, email, password, productEntries } of users) {
+    for (const { productType, authSecret } of productEntries) {
+        const authenticate = getAuthenticator(productType);
+        const [error, storageState] = await noTryAsync(() => authenticate(email, password, authSecret));
 
-for (const productType of Object.values(ProductType)) {
-    const authenticate = getAuthenticator(productType);
-    const storageState = await authenticate(email, password);
-
-    await prisma.productEntry.upsert({
-        where: { id: { userId, productType } },
-        create: { userId, productType, storageState },
-        update: { storageState },
-    })
+        if (error) {
+            logger.error(error, `Failed to login to ${productType}`);
+            continue;
+        }
+        
+        await prisma.productEntry.update({
+            where: { id: { userId, productType } },
+            data: { storageState },
+        })
+    }
 }
 
 function getAuthenticator(productType: ProductType) {

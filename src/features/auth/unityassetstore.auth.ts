@@ -1,8 +1,8 @@
 import { createBrowserContext } from '@/common/browser.js';
 import logger from '@/common/logger.js';
 
-export async function loginToUnityAssetStore(email: string, password: string): Promise<PrismaJson.StorageState> {
-    const context = await createBrowserContext();
+export async function loginToUnityAssetStore(email: string, password: string, authSecret: string | null): Promise<PrismaJson.StorageState> {
+    const context = await createBrowserContext({ cookies: [], origins: [] });
     try {
         const page = await context.newPage();
         logger.info('Navigating to login page');

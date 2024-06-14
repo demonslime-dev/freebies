@@ -21,16 +21,6 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
 
         await page.getByRole('button', { name: 'Buy Now' }).click();
 
-        // TODO: Fill billing details instead of placeholders
-        // logger.info('Filling billing details');
-        // const firstName = faker.person.firstName();
-        // const lastName = faker.person.lastName();
-        // const email = faker.internet.email();
-        // const phone = faker.phone.number();
-        // const address = faker.location.streetAddress();
-        // const pinCode = faker.location.zipCode();
-        // const city = faker.location.city();
-        //
         // await page.locator('[name="sta[country]"]').selectOption('IN');
         // await page.locator('[name="sta[region]"]').selectOption('MH');
         // await page.locator('[name="sta[firstName]"]').fill(firstName);

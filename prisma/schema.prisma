@@ -39,9 +39,10 @@ model Product {
 model ProductEntry {
   productType  ProductType
   /// [StorageState]
-  storageState Json
-  user         User?       @relation(fields: [userId], references: [id])
+  storageState Json?
+  authSecret   String?
   userId       String
+  user         User?       @relation(fields: [userId], references: [id])
 
   @@id([userId, productType], name: "id", map: "id")
 }

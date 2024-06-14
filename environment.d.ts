@@ -6,9 +6,6 @@ declare global {
             PROXY_SERVER: string;
             MAIL_AUTH_USER: string;
             MAIL_AUTH_PASS: string;
-            AUTH_NAME: string;
-            AUTH_EMAIL: string;
-            AUTH_PASSWORD: string;
         }
     }
 }
