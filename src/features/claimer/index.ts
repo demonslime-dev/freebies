@@ -1,5 +1,6 @@
 import { createBrowserContext } from '@/common/browser.js';
 import prisma from '@/common/database.js';
+import { AlreadyClaimedError } from '@/common/errors.js';
 import logger, { logError } from '@/common/logger.js';
 import { notifyFailure, notifySuccess } from '@/common/notifier.js';
 import { claimFromItchDotIo } from '@/features/claimer/itchdotio.claimer.js';
@@ -46,7 +47,10 @@ for (const user of users) {
         for (const product of assets) {
             const [error] = await noTryAsync(() => claimer(product.url, context), logError);
             if (!error) await noTryAsync(() => notifySuccess(user.email, product), logError);
-            else await noTryAsync(() => notifyFailure(user.email, product, error), logError);
+            else {
+                if (error instanceof AlreadyClaimedError) continue;
+                await noTryAsync(() => notifyFailure(user.email, product, error), logError);
+            }
         }
 
         await context.browser()?.close();

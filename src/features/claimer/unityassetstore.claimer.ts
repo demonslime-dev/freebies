@@ -1,5 +1,5 @@
 import { createBrowserContext } from "@/common/browser.js";
-import { UnauthorizedError } from '@/common/errors.js';
+import { AlreadyClaimedError, UnauthorizedError } from '@/common/errors.js';
 import logger from "@/common/logger.js";
 import { BrowserContext } from 'playwright';
 
@@ -14,10 +14,7 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
         if (await page.locator('#login-action').isVisible()) throw new UnauthorizedError();
         await page.locator('[data-test="avatar"]').click();
 
-        if (await page.getByRole('button', { name: 'Open in Unity' }).isVisible()) {
-            logger.info('Already claimed');
-            return;
-        }
+        if (await page.getByRole('button', { name: 'Open in Unity' }).isVisible()) throw new AlreadyClaimedError();
 
         await page.getByRole('button', { name: 'Buy Now' }).click();
 

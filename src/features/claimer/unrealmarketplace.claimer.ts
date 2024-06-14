@@ -1,4 +1,4 @@
-import { UnauthorizedError } from '@/common/errors.js';
+import { AlreadyClaimedError, UnauthorizedError } from '@/common/errors.js';
 import logger from '@/common/logger.js';
 import { BrowserContext } from 'playwright';
 
@@ -10,10 +10,7 @@ export async function claimFromUnrealMarketplace(url: string, context: BrowserCo
 
         logger.info('Checking for authentication state');
         if (!await page.locator('unrealengine-navigation[isloggedin="true"]').isVisible()) throw new UnauthorizedError();
-        if (await page.getByRole('link', { name: 'Open in Launcher' }).isVisible()) {
-            logger.info('Already claimed');
-            return;
-        }
+        if (await page.getByRole('link', { name: 'Open in Launcher' }).isVisible()) throw new AlreadyClaimedError();
 
         logger.info('Claiming');
         await page.getByRole('button', { name: 'Buy Now' }).click();

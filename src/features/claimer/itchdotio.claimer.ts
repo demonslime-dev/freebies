@@ -1,4 +1,4 @@
-import { UnauthorizedError } from '@/common/errors.js';
+import { AlreadyClaimedError, UnauthorizedError } from '@/common/errors.js';
 import logger from '@/common/logger.js';
 import { BrowserContext } from 'playwright';
 
@@ -10,10 +10,7 @@ export async function claimFromItchDotIo(url: string, context: BrowserContext) {
 
         logger.info('Checking for authentication state');
         if (!await page.locator('.logged_in').isVisible()) throw new UnauthorizedError();
-        if (await page.getByText(/You own this .+/).isVisible()) {
-            logger.info('Already claimed');
-            return;
-        }
+        if (await page.getByText(/You own this .+/).isVisible()) throw new AlreadyClaimedError();
 
         logger.info('Claiming');
         await page.getByText('Download or claim').locator('visible=true').first().click({ timeout: 1000 });
