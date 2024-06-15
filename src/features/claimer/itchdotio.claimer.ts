@@ -1,6 +1,6 @@
 import { AlreadyClaimedError, UnauthorizedError } from '@/common/errors.js';
 import logger from '@/common/logger.js';
-import { isLoggedInToItchDotIo } from '@/features/auth/itchdotio.auth.js';
+import { checkIsLoggedInToItchDotIoUsingPage } from '@auth/itchdotio.auth.js';
 import { BrowserContext } from 'playwright';
 
 export async function claimFromItchDotIo(url: string, context: BrowserContext) {
@@ -9,7 +9,7 @@ export async function claimFromItchDotIo(url: string, context: BrowserContext) {
         logger.info('Navigating to product page');
         await page.goto(url);
 
-        if (!await isLoggedInToItchDotIo(context)) throw new UnauthorizedError();
+        if (!await checkIsLoggedInToItchDotIoUsingPage(page)) throw new UnauthorizedError();
         if (await page.getByText(/You own this .+/).isVisible()) throw new AlreadyClaimedError();
 
         logger.info('Claiming');

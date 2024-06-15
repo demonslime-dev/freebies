@@ -2,9 +2,10 @@
   "extends": "@tsconfig/node-lts/tsconfig.json",
   "compilerOptions": {
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@auth/*": ["./src/features/auth/*"],
+      "@claimer/*": ["./src/features/claimer/*"],
+      "@scraper/*": ["./src/features/scraper/*"],
+      "@/*": ["./src/*"]
     }
   }
 }

@@ -1,6 +1,6 @@
 import { AlreadyClaimedError, UnauthorizedError } from '@/common/errors.js';
 import logger from "@/common/logger.js";
-import { isLoggedInToUnityAssetStore } from '@/features/auth/unityassetstore.auth.js';
+import { checkIsLoggedInToUnityAssetStoreUsingPage } from '@auth/unityassetstore.auth.js';
 import { BrowserContext } from 'playwright';
 
 export async function claimFromUnityAssetStore(url: string, context: BrowserContext) {
@@ -9,20 +9,9 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
         logger.info('Navigating to product page');
         await page.goto(url, { waitUntil: 'networkidle' });
 
-        if (!await isLoggedInToUnityAssetStore(context)) throw new UnauthorizedError();
+        if (!await checkIsLoggedInToUnityAssetStoreUsingPage(page)) throw new UnauthorizedError();
         if (await page.getByRole('button', { name: 'Open in Unity' }).isVisible()) throw new AlreadyClaimedError();
-
         await page.getByRole('button', { name: 'Buy Now' }).click();
-
-        // await page.locator('[name="sta[country]"]').selectOption('IN');
-        // await page.locator('[name="sta[region]"]').selectOption('MH');
-        // await page.locator('[name="sta[firstName]"]').fill(firstName);
-        // await page.locator('[name="sta[lastName]"]').fill(lastName);
-        // await page.locator('[name="sta[email]"]').fill(email);
-        // await page.locator('[name="sta[phoneNumber]"]').fill(phone);
-        // await page.locator('[name="sta[streetAddress]"]').fill(address);
-        // await page.locator('[name="sta[postalCode]"]').fill(pinCode);
-        // await page.locator('[name="sta[locality]"]').fill(city);
 
         await page.locator('[for="vatRegisteredNo"]').click();
         await page.locator('label[for="order_terms"]:visible').click();

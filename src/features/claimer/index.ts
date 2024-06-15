@@ -3,10 +3,8 @@ import prisma from '@/common/database.js';
 import { AlreadyClaimedError } from '@/common/errors.js';
 import { logError } from '@/common/logger.js';
 import { notifyFailure, notifySuccess } from '@/common/notifier.js';
-import { authenticateAndSaveStorageState, getAuthChecker } from '@/features/auth/index.js';
-import { claimFromItchDotIo } from '@/features/claimer/itchdotio.claimer.js';
-import { claimFromUnityAssetStore } from '@/features/claimer/unityassetstore.claimer.js';
-import { claimFromUnrealMarketplace } from '@/features/claimer/unrealmarketplace.claimer.js';
+import { authenticateAndSaveStorageState, getAuthChecker } from '@auth/utils.auth.js';
+import { getClaimer } from '@claimer/utils.claimer.js';
 import { ProductType } from '@prisma/client';
 import { noTryAsync } from 'no-try';
 
@@ -68,16 +66,5 @@ for (const { productEntries, ...user } of users) {
         }
 
         await context.browser()?.close();
-    }
-}
-
-function getClaimer(productType: ProductType) {
-    switch (productType) {
-        case ProductType.Itch:
-            return claimFromItchDotIo
-        case ProductType.Unity:
-            return claimFromUnityAssetStore
-        case ProductType.Unreal:
-            return claimFromUnrealMarketplace
     }
 }

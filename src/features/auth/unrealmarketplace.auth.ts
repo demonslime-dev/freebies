@@ -1,7 +1,7 @@
 import { createBrowserContext } from '@/common/browser.js';
 import logger from '@/common/logger.js';
 import { authenticator } from 'otplib';
-import { BrowserContext } from 'playwright';
+import { BrowserContext, Page } from 'playwright';
 
 export async function loginToUnrealMarketPlace(email: string, password: string, authSecret: string | null): Promise<PrismaJson.StorageState> {
     const context = await createBrowserContext({ cookies: [], origins: [] });
@@ -34,12 +34,17 @@ export async function loginToUnrealMarketPlace(email: string, password: string, 
     } finally { await context.browser()?.close(); }
 }
 
+export async function checkIsLoggedInToUnrealMarketplaceUsingPage(page: Page) {
+    try {
+        return await page.locator('unrealengine-navigation[isloggedin="true"]').isVisible();
+    } catch (error) { return false; }
+}
+
 export async function isLoggedInToUnrealMarketplace(context: BrowserContext) {
-    logger.info('Checking authentication state for unrealmarketplace');
+    logger.info('Checking authentication state for https://www.unrealengine.com/');
     const page = await context.newPage();
 
     try {
-        await page.goto('https://www.unrealengine.com/en-US');
-        return await page.locator('unrealengine-navigation[isloggedin="true"]').isVisible();
+        return await checkIsLoggedInToUnrealMarketplaceUsingPage(page);
     } finally { await page.close(); }
 }
