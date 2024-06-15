@@ -17,5 +17,4 @@ for (let i = 0; i < products.length; i++) {
     await noTryAsync(() => SaveProductToDatabase(products[i]), logError)
 }
 
-
 logger.info('Products data saved successfully');

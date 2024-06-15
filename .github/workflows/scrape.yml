@@ -19,5 +19,5 @@ jobs:
         run: npm install
       - name: Install Playwright Browser with Dependencies
         run: npx -y playwright install firefox --with-deps
-      - name: Claim
+      - name: Scrape
         run: npm run scrape

@@ -1,6 +1,6 @@
 import { createBrowserContext } from "@/common/browser.js";
 import { ProductPropertyNotFoundError } from '@/common/errors.js';
-import logger from "@/common/logger.js";
+import logger, { logError } from "@/common/logger.js";
 import { Prisma } from '@prisma/client';
 import { noTryAsync } from 'no-try';
 import { BrowserContext } from 'playwright';
@@ -48,12 +48,10 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<Prisma.P
         const loadingSpinner = gridLoader.locator('.loader_spinner');
         const productsLocator = page.locator('.game_cell');
 
-        logger.info(`${await productsLocator.count()} products loaded`);
-        // TODO: Find difference between `gridLoader.count() > 0` & `gridLoader.isVisible()`
-        while (await gridLoader.count() > 0) {
+        while (await gridLoader.isVisible()) {
             logger.info("Load more products")
-            await gridLoader.scrollIntoViewIfNeeded();
-            if (await loadingSpinner.isVisible()) await loadingSpinner.waitFor({ state: 'hidden' });
+            await noTryAsync(() => gridLoader.scrollIntoViewIfNeeded(), logError);
+            await loadingSpinner.waitFor({ state: 'hidden' });
             logger.info(`${await productsLocator.count()}/${totalProducts} products loaded`);
         }
 
