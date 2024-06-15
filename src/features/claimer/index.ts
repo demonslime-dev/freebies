@@ -4,7 +4,7 @@ import { AlreadyClaimedError } from '@/common/errors.js';
 import logger, { logError } from '@/common/logger.js';
 import { notifyFailure, notifySuccess } from '@/common/notifier.js';
 import { authenticateAndSaveStorageState, getAuthChecker } from '@auth/utils.auth.js';
-import { getClaimer } from '@claimer/utils.claimer.js';
+import { AddToClaimedProducts, getClaimer } from '@claimer/utils.claimer.js';
 import { ProductType } from '@prisma/client';
 import { noTryAsync } from 'no-try';
 
@@ -30,10 +30,10 @@ for (const product of products) {
     }
 }
 
-const users = await prisma.user.findMany({ include: { productEntries: true } });
+const users = await prisma.user.findMany({ include: { productEntries: { include: { products: true } } } });
 
 for (const { productEntries, ...user } of users) {
-    for (const { productType, storageState, authSecret } of productEntries) {
+    for (const { productType, storageState, authSecret, products: claimedProducts } of productEntries) {
         logger.info(`Claiming products from ${productType} as ${user.email}`);
         let context = await createBrowserContext(storageState);
 
@@ -56,9 +56,18 @@ for (const { productEntries, ...user } of users) {
 
         for (const product of assets) {
             logger.info(`Claiming ${product.url}`);
+
+            if (claimedProducts.includes(product)) {
+                logger.info('Already claimed');
+                continue;
+            }
+
             const [error] = await noTryAsync(() => claim(product.url, context), logError);
-            if (!error) await noTryAsync(() => notifySuccess(user.email, product), logError);
-            else {
+
+            if (!error) {
+                await noTryAsync(() => AddToClaimedProducts(product.id, user.id, productType), logError);
+                await noTryAsync(() => notifySuccess(user.email, product), logError);
+            } else {
                 if (error instanceof AlreadyClaimedError) continue;
                 await noTryAsync(() => notifyFailure(user.email, product, error), logError);
             }

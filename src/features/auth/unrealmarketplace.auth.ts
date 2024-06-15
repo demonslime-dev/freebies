@@ -37,7 +37,10 @@ export async function loginToUnrealMarketPlace(email: string, password: string, 
 export async function checkIsLoggedInToUnrealMarketplaceUsingPage(page: Page) {
     try {
         return await page.locator('unrealengine-navigation[isloggedin="true"]').isVisible();
-    } catch (error) { return false; }
+    } catch (error: any) {
+        logger.error(error, error.message);
+        return false;
+    }
 }
 
 export async function isLoggedInToUnrealMarketplace(context: BrowserContext) {

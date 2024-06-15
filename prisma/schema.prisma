@@ -27,24 +27,27 @@ model User {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  url         String
-  title       String
-  images      String[]
-  saleEndDate DateTime
+  id             String         @id @default(uuid())
+  url            String
+  title          String
+  images         String[]
+  saleEndDate    DateTime
+  productEntries ProductEntry[]
 
   @@unique([url, saleEndDate])
 }
 
 model ProductEntry {
+  id           String      @id @default(uuid())
   productType  ProductType
   /// [StorageState]
   storageState Json?
   authSecret   String?
+  products     Product[]
   userId       String
   user         User?       @relation(fields: [userId], references: [id])
 
-  @@id([userId, productType], name: "id", map: "id")
+  @@unique([userId, productType])
 }
 
 enum ProductType {

@@ -39,7 +39,10 @@ export async function checkIsLoggedInToUnityAssetStoreUsingPage(page: Page) {
         const isLoggedIn = await page.locator('#profile-option').isVisible();
         await page.locator('[data-test="avatar"]').click();
         return isLoggedIn;
-    } catch (error) { return false; }
+    } catch (error: any) {
+        logger.error(error, error.message);
+        return false;
+    }
 }
 
 export async function isLoggedInToUnityAssetStore(context: BrowserContext) {

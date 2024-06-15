@@ -31,7 +31,10 @@ export async function loginToItchDotIo(email: string, password: string, authSecr
 export async function checkIsLoggedInToItchDotIoUsingPage(page: Page) {
     try {
         return await page.locator('.logged_in').isVisible();
-    } catch (error) { return false; }
+    } catch (error: any) {
+        logger.error(error, error.message);
+        return false;
+    }
 }
 
 export async function isLoggedInToItchDotIo(context: BrowserContext) {

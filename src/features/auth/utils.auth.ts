@@ -18,7 +18,7 @@ export async function authenticateAndSaveStorageState({ user: { id: userId, emai
     const storageState = await authenticate(email, password, authSecret);
 
     await prisma.productEntry.update({
-        where: { id: { userId, productType } },
+        where: { userId_productType: { userId, productType } },
         data: { storageState }
     });
 

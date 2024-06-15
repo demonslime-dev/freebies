@@ -1,3 +1,4 @@
+import prisma from '@/common/database.js';
 import { claimFromItchDotIo } from '@claimer/itchdotio.claimer.js';
 import { claimFromUnityAssetStore } from '@claimer/unityassetstore.claimer.js';
 import { claimFromUnrealMarketplace } from '@claimer/unrealmarketplace.claimer.js';
@@ -12,4 +13,11 @@ export function getClaimer(productType: ProductType) {
         case ProductType.Unreal:
             return claimFromUnrealMarketplace
     }
+}
+
+export async function AddToClaimedProducts(productId: string, userId: string, productType: ProductType) {
+    await prisma.productEntry.update({
+        where: { userId_productType: { userId, productType } },
+        data: { products: { connect: { id: productId } } }
+    });
 }
