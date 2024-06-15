@@ -43,7 +43,6 @@ export async function checkIsLoggedInToUnityAssetStoreUsingPage(page: Page) {
 }
 
 export async function isLoggedInToUnityAssetStore(context: BrowserContext) {
-    logger.info('Checking authentication state for https://assetstore.unity.com/');
     const page = await context.newPage();
 
     try {

@@ -1,4 +1,5 @@
 import prisma from '@/common/database.js';
+import logger from '@/common/logger.js';
 import { isLoggedInToItchDotIo, loginToItchDotIo } from '@auth/itchdotio.auth.js';
 import { isLoggedInToUnityAssetStore, loginToUnityAssetStore } from '@auth/unityassetstore.auth.js';
 import { isLoggedInToUnrealMarketplace, loginToUnrealMarketPlace } from '@auth/unrealmarketplace.auth.js';
@@ -11,6 +12,8 @@ interface AuthOption {
 }
 
 export async function authenticateAndSaveStorageState({ user: { id: userId, email, password }, authSecret, productType }: AuthOption) {
+    logger.info(`Logging in to ${productType} as ${email}`);
+
     const authenticate = getAuthenticator(productType);
     const storageState = await authenticate(email, password, authSecret);
 
@@ -18,6 +21,8 @@ export async function authenticateAndSaveStorageState({ user: { id: userId, emai
         where: { id: { userId, productType } },
         data: { storageState }
     });
+
+    return storageState;
 }
 
 export function getAuthChecker(productType: ProductType) {

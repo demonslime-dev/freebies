@@ -31,6 +31,7 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<Prisma.Product
         const regex = /(\w+)\s(\d+),\s(\d+)\sat\s(\d+:\d+)(am|pm)\s(\w+)/i;
         const [_1, month, date, year, time, modifier, timezone] = regex.exec(endTimeText)!;
         const dateString = `${month} ${date}, ${year} ${convertTo24HourFormat(time, modifier)} ${timezone.replace('PT', 'GMT-0700')}`;
+        logger.info('1 free product retrieved');
 
         return [{
             url: url,

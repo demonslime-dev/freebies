@@ -86,6 +86,7 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<Prisma.P
             products.push(product);
         }
 
+        logger.info(`${products.length} free products retrieved`);
         return products;
     } finally { await context.browser()?.close(); }
 }

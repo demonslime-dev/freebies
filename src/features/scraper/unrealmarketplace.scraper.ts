@@ -30,6 +30,7 @@ export async function getFreeAssetsFromUnrealMarketPlace(): Promise<Prisma.Produ
             products.push(product);
         }
 
+        logger.info(`${products.length} free products retrieved`);
         return products;
     } finally { await context.browser()?.close(); }
 }

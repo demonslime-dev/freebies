@@ -41,7 +41,6 @@ export async function checkIsLoggedInToUnrealMarketplaceUsingPage(page: Page) {
 }
 
 export async function isLoggedInToUnrealMarketplace(context: BrowserContext) {
-    logger.info('Checking authentication state for https://www.unrealengine.com/');
     const page = await context.newPage();
 
     try {

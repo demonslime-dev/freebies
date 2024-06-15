@@ -35,7 +35,6 @@ export async function checkIsLoggedInToItchDotIoUsingPage(page: Page) {
 }
 
 export async function isLoggedInToItchDotIo(context: BrowserContext) {
-    logger.info('Checking authentication state for https://itch.io/');
     const page = await context.newPage();
 
     try {

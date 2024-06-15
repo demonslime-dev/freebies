@@ -1,7 +1,7 @@
 import { createBrowserContext } from '@/common/browser.js';
 import prisma from '@/common/database.js';
 import { AlreadyClaimedError } from '@/common/errors.js';
-import { logError } from '@/common/logger.js';
+import logger, { logError } from '@/common/logger.js';
 import { notifyFailure, notifySuccess } from '@/common/notifier.js';
 import { authenticateAndSaveStorageState, getAuthChecker } from '@auth/utils.auth.js';
 import { getClaimer } from '@claimer/utils.claimer.js';
@@ -34,21 +34,19 @@ const users = await prisma.user.findMany({ include: { productEntries: true } });
 
 for (const { productEntries, ...user } of users) {
     for (const { productType, storageState, authSecret } of productEntries) {
+        logger.info(`Claiming products from ${productType} as ${user.email}`);
         let context = await createBrowserContext(storageState);
 
         const authenticate = () => authenticateAndSaveStorageState({ user, authSecret, productType });
         const isAuthenticated = getAuthChecker(productType);
 
+        logger.info(`Checking authentication state for ${productType} as ${user.email}`);
         if (!await isAuthenticated(context)) {
             context.browser()?.close();
 
-            const [error] = await noTryAsync(authenticate, logError);
-            if (error) continue;
-
-            const { storageState } = await prisma.productEntry.findUniqueOrThrow({
-                where: { id: { userId: user.id, productType } },
-                select: { storageState: true }
-            });
+            logger.info(`${user.email} is not logged in to ${productType}`);
+            const [_, storageState] = await noTryAsync(authenticate, logError);
+            if (!storageState) continue;
 
             context = await createBrowserContext(storageState);
         }
@@ -57,6 +55,7 @@ for (const { productEntries, ...user } of users) {
         const claim = getClaimer(productType);
 
         for (const product of assets) {
+            logger.info(`Claiming ${product.url}`);
             const [error] = await noTryAsync(() => claim(product.url, context), logError);
             if (!error) await noTryAsync(() => notifySuccess(user.email, product), logError);
             else {
