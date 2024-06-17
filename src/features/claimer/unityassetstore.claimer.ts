@@ -7,7 +7,8 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
     const page = await context.newPage();
     try {
         logger.info('Navigating to product page');
-        await page.goto(url);
+        await page.goto(url, { waitUntil: 'networkidle' });
+        await page.waitForLoadState('load');
 
         logger.info('Checking for auth state');
         if (!await checkIsLoggedInToUnityAssetStoreUsingPage(page)) throw new UnauthorizedError();
