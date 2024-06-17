@@ -49,6 +49,7 @@ export async function isLoggedInToUnityAssetStore(context: BrowserContext) {
     const page = await context.newPage();
 
     try {
+        await page.goto('https://assetstore.unity.com/', { waitUntil: 'networkidle' });
         return await checkIsLoggedInToUnityAssetStoreUsingPage(page);
     } finally { await page.close(); }
 }

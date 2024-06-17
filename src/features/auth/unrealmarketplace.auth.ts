@@ -47,6 +47,7 @@ export async function isLoggedInToUnrealMarketplace(context: BrowserContext) {
     const page = await context.newPage();
 
     try {
+        await page.goto('https://www.unrealengine.com/en-US', { waitUntil: 'networkidle' });
         return await checkIsLoggedInToUnrealMarketplaceUsingPage(page);
     } finally { await page.close(); }
 }
