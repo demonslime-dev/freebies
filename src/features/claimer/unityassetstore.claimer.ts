@@ -9,6 +9,7 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
         logger.info('Navigating to product page');
         await page.goto(url);
 
+        logger.info('Checking for auth state');
         if (!await checkIsLoggedInToUnityAssetStoreUsingPage(page)) throw new UnauthorizedError();
         if (await page.getByRole('button', { name: 'Open in Unity' }).isVisible()) throw new AlreadyClaimedError();
         await page.getByRole('button', { name: 'Buy Now' }).click();
