@@ -59,7 +59,7 @@ for (const { productEntries, ...user } of users) {
         for (const product of assets) {
             logger.info(`Claiming ${product.url}`);
 
-            if (successfullyClaimedProducts.includes(product)) {
+            if (claimedProducts.includes(product)) {
                 logger.info('Already claimed');
                 continue;
             }
