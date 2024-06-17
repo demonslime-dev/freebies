@@ -5,7 +5,7 @@ import logger, { logError } from '@/common/logger.js';
 import { notifyFailure, notifySuccess } from '@/common/notifier.js';
 import { authenticateAndSaveStorageState, getAuthChecker } from '@auth/utils.auth.js';
 import { AddToClaimedProducts, getClaimer } from '@claimer/utils.claimer.js';
-import { ProductType } from '@prisma/client';
+import { Product, ProductType } from '@prisma/client';
 import { noTryAsync } from 'no-try';
 
 const products = await prisma.product.findMany({ where: { saleEndDate: { gt: new Date() } } });
@@ -54,10 +54,12 @@ for (const { productEntries, ...user } of users) {
         const assets = groupedProducts[productType];
         const claim = getClaimer(productType);
 
+        const successfullyClaimedProducts: Product[] = [];
+        const failedToClaimProducts: Product[] = [];
         for (const product of assets) {
             logger.info(`Claiming ${product.url}`);
 
-            if (claimedProducts.includes(product)) {
+            if (successfullyClaimedProducts.includes(product)) {
                 logger.info('Already claimed');
                 continue;
             }
@@ -66,13 +68,15 @@ for (const { productEntries, ...user } of users) {
 
             if (!error) {
                 await noTryAsync(() => AddToClaimedProducts(product.id, user.id, productType), logError);
-                await noTryAsync(() => notifySuccess(user.email, product), logError);
+                successfullyClaimedProducts.push(product);
             } else {
                 if (error instanceof AlreadyClaimedError) continue;
-                await noTryAsync(() => notifyFailure(user.email, product, error), logError);
+                failedToClaimProducts.push(product);
             }
         }
 
         await context.browser()?.close();
+        await noTryAsync(() => notifyFailure(user.email, productType, failedToClaimProducts), logError);
+        await noTryAsync(() => notifySuccess(user.email, productType, successfullyClaimedProducts), logError);
     }
 }
