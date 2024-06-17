@@ -59,7 +59,7 @@ const generateHtmlMessage = (products: Product[]) => `
         <td style="padding: 8px; border-bottom: 1px solid #ddd;">
             <a href="${url}">${title}</a>
         </td>
-        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${saleEndDate}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${saleEndDate.toDateString()}</td>
     </tr>
     `)).join('')}
     </tbody>
