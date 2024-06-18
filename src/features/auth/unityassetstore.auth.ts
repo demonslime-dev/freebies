@@ -36,8 +36,7 @@ export async function loginToUnityAssetStore(email: string, password: string, au
 export async function checkIsLoggedInToUnityAssetStoreUsingPage(page: Page) {
     try {
         await page.click('[data-test="avatar"]');
-        await page.waitForTimeout(1000);
-        const isLoggedIn = await page.isVisible('#profile-option');
+        const isLoggedIn = !await page.isVisible('#login-action');
         await page.click('[data-test="avatar"]');
         return isLoggedIn;
     } catch (error: any) {
