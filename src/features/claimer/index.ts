@@ -70,7 +70,11 @@ for (const { productEntries, ...user } of users) {
                 await noTryAsync(() => AddToClaimedProducts(product.id, user.id, productType), logError);
                 successfullyClaimedProducts.push(product);
             } else {
-                if (error instanceof AlreadyClaimedError) continue;
+                if (error instanceof AlreadyClaimedError) {
+                    await noTryAsync(() => AddToClaimedProducts(product.id, user.id, productType), logError);
+                    continue;
+                }
+                
                 failedToClaimProducts.push(product);
             }
         }
