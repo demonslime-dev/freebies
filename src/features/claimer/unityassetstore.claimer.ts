@@ -11,7 +11,7 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
 
         logger.info('Checking for auth state');
         if (!await checkIsLoggedInToUnityAssetStoreUsingPage(page)) throw new UnauthorizedError();
-        if (await page.getByRole('button', { name: 'Open in Unity' }).isVisible()) throw new AlreadyClaimedError();
+        if (await page.getByLabel('Open in Unity').isVisible()) throw new AlreadyClaimedError();
         await page.getByRole('button', { name: 'Buy Now' }).click();
 
         await page.locator('[for="vatRegisteredNo"]').click();
