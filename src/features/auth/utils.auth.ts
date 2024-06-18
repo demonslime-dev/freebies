@@ -3,23 +3,19 @@ import logger from '@/common/logger.js';
 import { isLoggedInToItchDotIo, loginToItchDotIo } from '@auth/itchdotio.auth.js';
 import { isLoggedInToUnityAssetStore, loginToUnityAssetStore } from '@auth/unityassetstore.auth.js';
 import { isLoggedInToUnrealMarketplace, loginToUnrealMarketPlace } from '@auth/unrealmarketplace.auth.js';
-import { ProductType, User } from '@prisma/client';
+import { ProductType } from '@prisma/client';
 
-interface AuthOption {
-    user: User,
-    authSecret: string | null,
-    productType: ProductType
-}
-
-export async function authenticateAndSaveStorageState({ user: { id: userId, email, password }, authSecret, productType }: AuthOption) {
+export async function authenticateAndSaveStorageState(email: string, password: string, authSecret: string | null, productType: ProductType) {
     logger.info(`Logging in to ${productType} as ${email}`);
 
     const authenticate = getAuthenticator(productType);
     const storageState = await authenticate(email, password, authSecret);
+    const { id: userId } = await prisma.user.findUniqueOrThrow({ where: { email } });
 
-    await prisma.productEntry.update({
+    await prisma.productEntry.upsert({
         where: { userId_productType: { userId, productType } },
-        data: { storageState }
+        create: { userId, productType, storageState },
+        update: { storageState },
     });
 
     return storageState;

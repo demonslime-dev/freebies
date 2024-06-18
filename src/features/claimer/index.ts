@@ -32,19 +32,19 @@ for (const product of products) {
 
 const users = await prisma.user.findMany({ include: { productEntries: { include: { products: true } } } });
 
-for (const { productEntries, ...user } of users) {
+for (const { id, email, password, productEntries, } of users) {
     for (const { productType, storageState, authSecret, products: claimedProducts } of productEntries) {
-        logger.info(`Claiming products from ${productType} as ${user.email}`);
+        logger.info(`Claiming products from ${productType} as ${email}`);
         let context = await createBrowserContext(storageState);
 
-        const authenticate = () => authenticateAndSaveStorageState({ user, authSecret, productType });
+        const authenticate = () => authenticateAndSaveStorageState(email, password, authSecret, productType);
         const isAuthenticated = getAuthChecker(productType);
 
-        logger.info(`Checking authentication state for ${productType} as ${user.email}`);
+        logger.info(`Checking authentication state for ${productType} as ${email}`);
         if (!await isAuthenticated(context)) {
             context.browser()?.close();
 
-            logger.info(`${user.email} is not logged in to ${productType}`);
+            logger.info(`${email} is not logged in to ${productType}`);
             const [_, storageState] = await noTryAsync(authenticate, logError);
             if (!storageState) continue;
 
@@ -67,20 +67,20 @@ for (const { productEntries, ...user } of users) {
             const [error] = await noTryAsync(() => claim(product.url, context), logError);
 
             if (!error) {
-                await noTryAsync(() => AddToClaimedProducts(product.id, user.id, productType), logError);
+                await noTryAsync(() => AddToClaimedProducts(product.id, id, productType), logError);
                 successfullyClaimedProducts.push(product);
             } else {
                 if (error instanceof AlreadyClaimedError) {
-                    await noTryAsync(() => AddToClaimedProducts(product.id, user.id, productType), logError);
+                    await noTryAsync(() => AddToClaimedProducts(product.id, id, productType), logError);
                     continue;
                 }
-                
+
                 failedToClaimProducts.push(product);
             }
         }
 
         await context.browser()?.close();
-        await noTryAsync(() => notifyFailure(user.email, productType, failedToClaimProducts), logError);
-        await noTryAsync(() => notifySuccess(user.email, productType, successfullyClaimedProducts), logError);
+        await noTryAsync(() => notifyFailure(email, productType, failedToClaimProducts), logError);
+        await noTryAsync(() => notifySuccess(email, productType, successfullyClaimedProducts), logError);
     }
 }
