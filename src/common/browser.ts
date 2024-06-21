@@ -4,15 +4,9 @@ const launchBrowser = async () => await chromium.launch({ headless: true });
 
 export const createBrowserContext = async (storageState?: PrismaJson.StorageState | null) => {
     const browser = await launchBrowser();
-    const server = process.env.PROXY_SERVER;
-    const proxy = server && storageState ? { server } : undefined;
 
-    const context = await browser.newContext({
-        ...devices['Desktop Firefox'],
+    return await browser.newContext({
+        ...devices['Desktop Chrome'],
         storageState: storageState ?? undefined,
-        proxy
     });
-
-    context.setDefaultNavigationTimeout(5 * 60 * 1000);
-    return context;
 }

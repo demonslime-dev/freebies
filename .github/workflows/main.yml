@@ -1,26 +1,28 @@
-name: Claim
+name: Main
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 1,13 * * *'
+    - cron: '0 0,12 * * *'
 
 env:
   DIRECT_URL: ${{secrets.DIRECT_URL}}
   DATABASE_URL: ${{secrets.DATABASE_URL}}
-  PROXY_SERVER: ${{secrets.PROXY_SERVER}}
   MAIL_AUTH_USER: ${{secrets.MAIL_AUTH_USER}}
   MAIL_AUTH_PASS: ${{secrets.MAIL_AUTH_PASS}}
 
 jobs:
+  Scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Dependencies
+        uses: ./.github/workflows/action.yml
+      - name: Scrape
+        run: npm run scrape
   Claim:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install NPM Packages
-        run: npm install
-      - name: Install Playwright Browser with Dependencies
-        run: npx -y playwright install chromium --with-deps
+      - name: Install Dependencies
+        uses: ./.github/workflows/action.yml
       - name: Claim
         run: npm run claim

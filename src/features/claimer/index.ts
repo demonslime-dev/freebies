@@ -38,10 +38,11 @@ for (const { id, email, password, productEntries, } of users) {
         let context = await createBrowserContext(storageState);
 
         const authenticate = () => authenticateAndSaveStorageState(email, password, authSecret, productType);
-        const isAuthenticated = getAuthChecker(productType);
+        const checkAuthState = () => getAuthChecker(productType)(context);
 
         logger.info(`Checking authentication state for ${productType} as ${email}`);
-        if (!await isAuthenticated(context)) {
+        const [_, isAuthenticated] = await noTryAsync(checkAuthState, logError);
+        if (!isAuthenticated) {
             context.browser()?.close();
 
             logger.info(`${email} is not logged in to ${productType}`);
