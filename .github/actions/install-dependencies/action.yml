@@ -1,11 +1,12 @@
-name: Install Playwright Dependencies
+name: Install Dependencies
+description: Install NPM Packages and Playwright Browser with Dependencies
 
 runs:
   using: "composite"
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
     - name: Install NPM Packages
       run: npm install
+      shell: bash
     - name: Install Playwright Browser with Dependencies
       run: npx -y playwright install chromium --with-deps
+      shell: bash

@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install Dependencies
-        uses: ./.github/workflows/action.yml
+        uses: ./.github/actions/install-dependencies
       - name: Scrape
         run: npm run scrape
   Claim:
@@ -27,6 +27,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install Dependencies
-        uses: ./.github/workflows/action.yml
+        uses: ./.github/actions/install-dependencies
       - name: Claim
         run: npm run claim
