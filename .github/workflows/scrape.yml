@@ -1,4 +1,4 @@
-name: Main
+name: Scrape
 
 on:
   workflow_dispatch:
@@ -8,8 +8,6 @@ on:
 env:
   DIRECT_URL: ${{secrets.DIRECT_URL}}
   DATABASE_URL: ${{secrets.DATABASE_URL}}
-  MAIL_AUTH_USER: ${{secrets.MAIL_AUTH_USER}}
-  MAIL_AUTH_PASS: ${{secrets.MAIL_AUTH_PASS}}
 
 jobs:
   Scrape:
@@ -21,13 +19,3 @@ jobs:
         uses: ./.github/actions/install-dependencies
       - name: Scrape
         run: npm run scrape
-  Claim:
-    needs: Scrape
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install Dependencies
-        uses: ./.github/actions/install-dependencies
-      - name: Claim
-        run: npm run claim
