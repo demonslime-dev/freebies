@@ -13,9 +13,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install NPM Packages
-        run: npm install
-      - name: Install Playwright Browser with Dependencies
-        run: npx -y playwright install chromium --with-deps
+      - name: Install Dependencies
+        uses: ./.github/workflows/action.yml
       - name: Authenticate
         run: npm run auth

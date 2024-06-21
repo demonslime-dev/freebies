@@ -3,8 +3,6 @@ name: Install Playwright Dependencies
 runs:
   using: "composite"
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
     - name: Install NPM Packages
       run: npm install
     - name: Install Playwright Browser with Dependencies
