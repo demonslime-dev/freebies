@@ -8,6 +8,9 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
     try {
         logger.info('Navigating to product page');
         await page.goto(url);
+        // Auth request starts after some time of page load, so wait for auth request to complete
+        await page.waitForTimeout(2000);
+        await page.waitForURL(url);
 
         if (!await checkIsLoggedInToUnityAssetStoreUsingPage(page)) throw new UnauthorizedError();
         // FIXME: Sometimes "Open in Unity" button keeps loading indefinitely

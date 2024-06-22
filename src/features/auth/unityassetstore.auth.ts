@@ -49,7 +49,11 @@ export async function isLoggedInToUnityAssetStore(context: BrowserContext) {
     const page = await context.newPage();
 
     try {
-        await page.goto('https://assetstore.unity.com/');
+        const url = 'https://assetstore.unity.com/';
+        await page.goto(url);
+        // Auth request starts after some time of page load, so wait for auth request to complete
+        await page.waitForTimeout(2000);
+        await page.waitForURL(url);
         return await checkIsLoggedInToUnityAssetStoreUsingPage(page);
     } finally { await page.close(); }
 }
