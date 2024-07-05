@@ -7,14 +7,12 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
     const page = await context.newPage();
     try {
         logger.info('Navigating to product page');
-        await page.goto(url);
-        // Auth request starts after some time of page load, so wait for auth request to complete
-        await page.waitForTimeout(2000);
+        await page.goto(url, { waitUntil: 'domcontentloaded' });
+        await page.waitForRequest('https://api.unity.com/v1/oauth2/authorize*');
         await page.waitForURL(url);
 
         if (!await checkIsLoggedInToUnityAssetStoreUsingPage(page)) throw new UnauthorizedError();
-        // FIXME: Sometimes "Open in Unity" button keeps loading indefinitely
-        if (await page.getByRole('button', { name: 'Open in Unity' }).isVisible()) throw new AlreadyClaimedError();
+        if (await page.getByText('You purchased this item on').isVisible()) throw new AlreadyClaimedError();
         await page.getByRole('button', { name: 'Buy Now' }).click();
 
         await page.locator('[for="vatRegisteredNo"]').click();

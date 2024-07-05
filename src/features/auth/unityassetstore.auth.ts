@@ -36,9 +36,7 @@ export async function loginToUnityAssetStore(email: string, password: string, au
 export async function checkIsLoggedInToUnityAssetStoreUsingPage(page: Page) {
     try {
         await page.click('[data-test="avatar"]');
-        const isLoggedIn = !await page.isVisible('#login-action');
-        await page.click('[data-test="avatar"]');
-        return isLoggedIn;
+        return !await page.isVisible('#login-action');
     } catch (error: any) {
         logger.error(error, error.message);
         return false;
@@ -50,9 +48,8 @@ export async function isLoggedInToUnityAssetStore(context: BrowserContext) {
 
     try {
         const url = 'https://assetstore.unity.com/';
-        await page.goto(url);
-        // Auth request starts after some time of page load, so wait for auth request to complete
-        await page.waitForTimeout(2000);
+        await page.goto(url, { waitUntil: 'domcontentloaded' });
+        await page.waitForRequest('https://api.unity.com/v1/oauth2/authorize*');
         await page.waitForURL(url);
         return await checkIsLoggedInToUnityAssetStoreUsingPage(page);
     } finally { await page.close(); }
