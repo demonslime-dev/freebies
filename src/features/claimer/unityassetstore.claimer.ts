@@ -7,9 +7,7 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
     const page = await context.newPage();
     try {
         logger.info('Navigating to product page');
-        await page.goto(url, { waitUntil: 'domcontentloaded' });
-        await page.waitForRequest('https://api.unity.com/v1/oauth2/authorize*');
-        await page.waitForURL(url);
+        await page.goto(url, { waitUntil: 'load' });
 
         if (!await checkIsLoggedInToUnityAssetStoreUsingPage(page)) throw new UnauthorizedError();
         if (await page.getByText('You purchased this item on').isVisible()) throw new AlreadyClaimedError();
