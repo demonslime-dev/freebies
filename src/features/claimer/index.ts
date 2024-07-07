@@ -8,15 +8,15 @@ import { AddToClaimedProducts, getClaimer } from '@claimer/utils.claimer.js';
 import { Product, ProductType } from '@prisma/client';
 import { noTryAsync } from 'no-try';
 
-const products = await prisma.product.findMany({ where: { saleEndDate: { gt: new Date() } } });
+const productsToClaim = await prisma.product.findMany({ where: { saleEndDate: { gt: new Date() } } });
 
-const groupedProducts: Record<ProductType, typeof products> = {
+const groupedProducts: Record<ProductType, typeof productsToClaim> = {
     [ProductType.Unreal]: [],
     [ProductType.Unity]: [],
     [ProductType.Itch]: []
 }
 
-for (const product of products) {
+for (const product of productsToClaim) {
     switch (true) {
         case /^https:\/\/.+\.itch\.io/.test(product.url):
             groupedProducts[ProductType.Itch].push(product);
@@ -52,31 +52,31 @@ for (const { id, email, password, productEntries, } of users) {
             context = await createBrowserContext(storageState);
         }
 
-        const assets = groupedProducts[productType];
+        const products = groupedProducts[productType];
         const claim = getClaimer(productType);
 
         const successfullyClaimedProducts: Product[] = [];
         const failedToClaimProducts: Product[] = [];
-        for (const product of assets) {
-            logger.info(`Claiming ${product.url}`);
+        for (let i = 0; i < products.length; i++) {
+            logger.info(`${i + 1}/${products.length} Claiming ${products[i].url}`);
 
-            if (claimedProducts.includes(product)) {
+            if (claimedProducts.includes(products[i])) {
                 logger.info('Already claimed');
                 continue;
             }
 
-            const [error] = await noTryAsync(() => claim(product.url, context), logError);
+            const [error] = await noTryAsync(() => claim(products[i].url, context), logError);
 
             if (!error) {
-                await noTryAsync(() => AddToClaimedProducts(product.id, id, productType), logError);
-                successfullyClaimedProducts.push(product);
+                await noTryAsync(() => AddToClaimedProducts(products[i].id, id, productType), logError);
+                successfullyClaimedProducts.push(products[i]);
             } else {
                 if (error instanceof AlreadyClaimedError) {
-                    await noTryAsync(() => AddToClaimedProducts(product.id, id, productType), logError);
+                    await noTryAsync(() => AddToClaimedProducts(products[i].id, id, productType), logError);
                     continue;
                 }
 
-                failedToClaimProducts.push(product);
+                failedToClaimProducts.push(products[i]);
             }
         }
 
