@@ -32,7 +32,7 @@ for (const product of productsToClaim) {
 
 const users = await prisma.user.findMany({ include: { productEntries: { include: { products: true } } } });
 
-for (const { id, email, password, productEntries, } of users) {
+for (const { id: userId, email, password, productEntries, } of users) {
     for (const { productType, storageState, authSecret, products: claimedProducts } of productEntries) {
         logger.info(`Claiming products from ${productType} as ${email}`);
         let context = await createBrowserContext(storageState);
@@ -60,7 +60,9 @@ for (const { id, email, password, productEntries, } of users) {
         for (let i = 0; i < products.length; i++) {
             logger.info(`${i + 1}/${products.length} Claiming ${products[i].url}`);
 
-            if (claimedProducts.includes(products[i])) {
+            // obj1 != obj2, even if both are identical
+            // if (claimedProducts.includes(products[i])) {
+            if (claimedProducts.some(({ id }) => products[i].id === id)) {
                 logger.info('Already claimed');
                 continue;
             }
@@ -68,11 +70,11 @@ for (const { id, email, password, productEntries, } of users) {
             const [error] = await noTryAsync(() => claim(products[i].url, context), logError);
 
             if (!error) {
-                await noTryAsync(() => AddToClaimedProducts(products[i].id, id, productType), logError);
+                await noTryAsync(() => AddToClaimedProducts(products[i].id, userId, productType), logError);
                 successfullyClaimedProducts.push(products[i]);
             } else {
                 if (error instanceof AlreadyClaimedError) {
-                    await noTryAsync(() => AddToClaimedProducts(products[i].id, id, productType), logError);
+                    await noTryAsync(() => AddToClaimedProducts(products[i].id, userId, productType), logError);
                     continue;
                 }
 
