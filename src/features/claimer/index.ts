@@ -4,7 +4,7 @@ import { AlreadyClaimedError } from '@/common/errors.js';
 import logger, { logError } from '@/common/logger.js';
 import { notifyFailure, notifySuccess } from '@/common/notifier.js';
 import { authenticateAndSaveStorageState, getAuthChecker } from '@auth/utils.auth.js';
-import { AddToClaimedProducts, getClaimer } from '@claimer/utils.claimer.js';
+import { addToClaimedProducts, getClaimer } from '@claimer/utils.claimer.js';
 import { Product, ProductType } from '@prisma/client';
 import { noTryAsync } from 'no-try';
 
@@ -70,11 +70,11 @@ for (const { id: userId, email, password, productEntries, } of users) {
             const [error] = await noTryAsync(() => claim(products[i].url, context), logError);
 
             if (!error) {
-                await noTryAsync(() => AddToClaimedProducts(products[i].id, userId, productType), logError);
+                await noTryAsync(() => addToClaimedProducts(products[i].id, userId, productType), logError);
                 successfullyClaimedProducts.push(products[i]);
             } else {
                 if (error instanceof AlreadyClaimedError) {
-                    await noTryAsync(() => AddToClaimedProducts(products[i].id, userId, productType), logError);
+                    await noTryAsync(() => addToClaimedProducts(products[i].id, userId, productType), logError);
                     continue;
                 }
 

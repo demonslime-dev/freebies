@@ -15,7 +15,7 @@ export function getClaimer(productType: ProductType) {
     }
 }
 
-export async function AddToClaimedProducts(productId: string, userId: string, productType: ProductType) {
+export async function addToClaimedProducts(productId: string, userId: string, productType: ProductType) {
     await prisma.productEntry.update({
         where: { userId_productType: { userId, productType } },
         data: { products: { connect: { id: productId } } }
