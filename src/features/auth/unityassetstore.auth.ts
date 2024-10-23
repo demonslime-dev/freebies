@@ -35,6 +35,7 @@ export async function loginToUnityAssetStore(email: string, password: string, au
 
 export async function checkIsLoggedInToUnityAssetStoreUsingPage(page: Page) {
     try {
+        await page.getByRole('button', { name: 'Buy Now' }).waitFor();
         await page.click('[data-test="avatar"]');
         return !await page.isVisible('#login-action');
     } catch (error: any) {
@@ -47,9 +48,8 @@ export async function isLoggedInToUnityAssetStore(context: BrowserContext) {
     const page = await context.newPage();
 
     try {
-        const url = 'https://assetstore.unity.com/';
+        const url = 'https://assetstore.unity.com/packages/essentials/tutorial-projects/polygon-prototype-low-poly-3d-art-by-synty-137126';
         await page.goto(url, { waitUntil: 'load' });
-        await page.waitForTimeout(10000);
 
         return await checkIsLoggedInToUnityAssetStoreUsingPage(page);
     } finally { await page.close(); }

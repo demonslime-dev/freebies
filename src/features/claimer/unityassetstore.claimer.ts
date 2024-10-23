@@ -8,7 +8,6 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
     try {
         logger.info('Navigating to product page');
         await page.goto(url, { waitUntil: 'load' });
-        await page.waitForTimeout(10000);
 
         if (!await checkIsLoggedInToUnityAssetStoreUsingPage(page)) throw new UnauthorizedError();
         if (await page.getByText('You purchased this item on').isVisible()) throw new AlreadyClaimedError();
