@@ -12,7 +12,9 @@ type GamesSaleUrl = 'https://itch.io/games/on-sale';
 type ProductSaleUrl = AssetsSaleUrl | AlbumsSaleUrl | GamesSaleUrl;
 
 export async function getFreeAssetsFromItchDotIo() {
-    return getFreeProducts('https://itch.io/game-assets/on-sale');
+    const freeAssets = await getFreeProducts('https://itch.io/game-assets/on-sale');
+    const freeAlbums = await getFreeAlbumsFromItchDotIo();
+    return freeAssets.concat(freeAlbums);
 }
 
 export async function getFreeAlbumsFromItchDotIo() {
@@ -25,10 +27,8 @@ export async function getFreeGamesFromItchDotIo() {
 
 export async function getFreeProductsFromItchDotIo() {
     const freeAssets = await getFreeAssetsFromItchDotIo();
-    const freeAlbums = await getFreeAlbumsFromItchDotIo();
     const freeGames = await getFreeGamesFromItchDotIo();
-
-    return [...freeAssets, ...freeAlbums, ...freeGames];
+    return freeAssets.concat(freeGames);
 }
 
 async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<Prisma.ProductCreateInput[]> {
