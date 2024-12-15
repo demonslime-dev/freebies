@@ -2,6 +2,7 @@ import { createBrowserContext } from "@/common/browser.js";
 import { ProductPropertyNotFoundError } from '@/common/errors.js';
 import logger from '@/common/logger.js';
 import { Prisma } from '@prisma/client';
+import { convertTo24HourFormat } from '@scraper/utils.scraper.js';
 
 export async function getFreeAssetsFromUnityAssetStore(): Promise<Prisma.ProductCreateInput[]> {
     const assetUrl = 'https://assetstore.unity.com/publisher-sale';
@@ -13,9 +14,9 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<Prisma.Product
 
         logger.info('Getting sale end date');
         const endTimeText = await page.getByText('* Sale and related free asset promotion end').innerText();
-        const regex = /(\w+)\s(\d+),\s(\d+)\sat\s(\d+:\d+)(am|pm)\s(\w+)/i;
-        const [_1, month, date, year, time, modifier, timezone] = regex.exec(endTimeText)!;
-        const dateString = `${month} ${date}, ${year} ${convertTo24HourFormat(time, modifier)} ${timezone.replace('PT', 'GMT-0700')}`;
+        const regex = /(\w+)\s(\d+),\s(\d+)\sat\s(\d+):(\d+)(am|pm)\s(\w+)/i;
+        const [_1, month, date, year, hours, minutes, period, timezone] = regex.exec(endTimeText)!;
+        const dateString = `${month} ${date}, ${year} ${convertTo24HourFormat(hours, minutes, period)} GMT-0700`;
 
         const getYourGiftLocator = page.getByRole('link', { name: 'Get your gift' });
         const saleContainerLocator = getYourGiftLocator.locator('../..');
@@ -42,14 +43,4 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<Prisma.Product
             saleEndDate: new Date(dateString)
         }];
     } finally { await context.browser()?.close(); }
-}
-
-function convertTo24HourFormat(time: string, modifier: string | 'am' | 'pm') {
-    const [hours, minutes] = time.split(':');
-    let hoursIn24 = parseInt(hours, 10);
-
-    if (modifier === 'pm' && hoursIn24 < 12) hoursIn24 += 12;
-    if (modifier === 'am' && hoursIn24 === 12) hoursIn24 = 0;
-
-    return `${hoursIn24}:${minutes}`;
 }

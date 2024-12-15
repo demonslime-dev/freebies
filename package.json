@@ -12,16 +12,11 @@
     "claim": "tsx src/features/claimer",
     "scrape": "tsx src/features/scraper",
     "db:push": "prisma db push --force-reset --accept-data-loss",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "experiment": "tsx src/test.ts"
   },
   "dependencies": {
-    "@faker-js/faker": "^8.4.1",
     "@prisma/client": "^5.14.0",
-    "axios": "^1.6.8",
-    "commander": "^12.1.0",
-    "cron": "^3.1.7",
-    "express": "^5.0.0-beta.3",
-    "jose": "^5.3.0",
     "no-try": "^4.0.0",
     "nodemailer": "^6.9.13",
     "otplib": "^12.0.1",
@@ -32,7 +27,6 @@
   },
   "devDependencies": {
     "@tsconfig/node-lts": "^20.1.3",
-    "@types/express": "^4.17.21",
     "@types/node": "^20.12.12",
     "@types/nodemailer": "^6.4.15",
     "dotenv": "^16.4.5",
