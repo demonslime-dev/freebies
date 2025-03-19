@@ -3,15 +3,14 @@ name: Scrape
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0,12 * * *'
+    - cron: "0 0,12 * * *"
 
 env:
-  DIRECT_URL: ${{secrets.DIRECT_URL}}
   DATABASE_URL: ${{secrets.DATABASE_URL}}
 
 jobs:
   Scrape:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4

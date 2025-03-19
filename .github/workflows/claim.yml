@@ -9,14 +9,13 @@ on:
       - completed
 
 env:
-  DIRECT_URL: ${{secrets.DIRECT_URL}}
   DATABASE_URL: ${{secrets.DATABASE_URL}}
   MAIL_AUTH_USER: ${{secrets.MAIL_AUTH_USER}}
   MAIL_AUTH_PASS: ${{secrets.MAIL_AUTH_PASS}}
 
 jobs:
   Claim:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
