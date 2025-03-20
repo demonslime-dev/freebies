@@ -12,11 +12,11 @@
     "claim": "tsx src/features/claimer",
     "scrape": "tsx src/features/scraper",
     "db:push": "prisma db push --force-reset --accept-data-loss",
-    "db:studio": "prisma studio",
+    "db:view": "prisma studio",
     "experiment": "tsx src/test.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.14.0",
+    "@prisma/client": "^6.5.0",
     "luxon": "^3.5.0",
     "no-try": "^4.0.0",
     "nodemailer": "^6.9.13",
@@ -32,7 +32,7 @@
     "@types/node": "^20.12.12",
     "@types/nodemailer": "^6.4.15",
     "dotenv": "^16.4.5",
-    "prisma": "^5.14.0",
+    "prisma": "^6.5.0",
     "tsx": "^4.10.5",
     "typescript": "^5.4.5"
   }
