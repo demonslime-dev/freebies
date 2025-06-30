@@ -1,23 +1,21 @@
-import prisma from '@/common/database.js';
-import { claimFromItchDotIo } from '@claimer/itchdotio.claimer.js';
-import { claimFromUnityAssetStore } from '@claimer/unityassetstore.claimer.js';
-import { claimFromUnrealMarketplace } from '@claimer/unrealmarketplace.claimer.js';
-import { ProductType } from '@prisma/client';
+import { claimFromFab } from "$claimer/fab.claimer.ts";
+import { claimFromItchDotIo } from "$claimer/itch.claimer.ts";
+import { claimFromUnityAssetStore } from "$claimer/unity.claimer.ts";
+import db from "$db/index.ts";
+import { userToProduct } from "$db/schema.ts";
+import { Product, ProductType, User } from "$db/types.ts";
 
 export function getClaimer(productType: ProductType) {
-    switch (productType) {
-        case ProductType.Itch:
-            return claimFromItchDotIo
-        case ProductType.Unity:
-            return claimFromUnityAssetStore
-        case ProductType.Unreal:
-            return claimFromUnrealMarketplace
-    }
+  switch (productType) {
+    case "Itch":
+      return claimFromItchDotIo;
+    case "Unity":
+      return claimFromUnityAssetStore;
+    case "Fab":
+      return claimFromFab;
+  }
 }
 
-export async function addToClaimedProducts(productId: string, userId: string, productType: ProductType) {
-    await prisma.productEntry.update({
-        where: { userId_productType: { userId, productType } },
-        data: { products: { connect: { id: productId } } }
-    });
+export async function addToClaimedProducts(productId: Product["id"], userId: User["id"]) {
+  await db.insert(userToProduct).values({ userId, productId }).onConflictDoNothing();
 }

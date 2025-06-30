@@ -1,89 +1,72 @@
-import { createBrowserContext } from '@/common/browser.js';
-import prisma from '@/common/database.js';
-import { AlreadyClaimedError } from '@/common/errors.js';
-import logger, { logError } from '@/common/logger.js';
-import { notifyFailure, notifySuccess } from '@/common/notifier.js';
-import { authenticateAndSaveStorageState, getAuthChecker } from '@auth/utils.auth.js';
-import { addToClaimedProducts, getClaimer } from '@claimer/utils.claimer.js';
-import { Product, ProductType } from '@prisma/client';
-import { noTryAsync } from 'no-try';
+import { authenticateAndSaveStorageState, getAuthChecker } from "$auth/utils.auth.ts";
+import { addToClaimedProducts, getClaimer } from "$claimer/utils.claimer.ts";
+import { createBrowserContext } from "$common/browser.ts";
+import { AlreadyClaimedError } from "$common/errors.ts";
+import { notifyFailure, notifySuccess } from "$common/notifier.ts";
+import db from "$db/index.ts";
+import { Product } from "$db/types.ts";
+import { noTryAsync } from "no-try";
 
-const productsToClaim = await prisma.product.findMany({ where: { saleEndDate: { gt: new Date() } } });
+const productsToClaim = await db.query.product.findMany({
+  where: { saleEndDate: { gt: new Date() } },
+});
 
-const groupedProducts: Record<ProductType, typeof productsToClaim> = {
-    [ProductType.Unreal]: [],
-    [ProductType.Unity]: [],
-    [ProductType.Itch]: []
-}
+const groupedProducts = Map.groupBy(productsToClaim, (product) => product.productType);
 
-for (const product of productsToClaim) {
-    switch (true) {
-        case /^https:\/\/.+\.itch\.io/.test(product.url):
-            groupedProducts[ProductType.Itch].push(product);
-            break;
-        case /^https:\/\/assetstore\.unity\.com/.test(product.url):
-            groupedProducts[ProductType.Unity].push(product);
-            break;
-        case /^https:\/\/www\.unrealengine\.com/.test(product.url):
-            groupedProducts[ProductType.Unreal].push(product);
-            break;
+const users = await db.query.user.findMany({ with: { authStates: true, claimedProducts: true } });
+
+for (const { id: userId, email, password, authStates, claimedProducts } of users) {
+  for (const { productType, storageState, authSecret } of authStates) {
+    console.log(`Claiming products from ${productType} as ${email}`);
+    let context = await createBrowserContext(storageState);
+
+    const authenticate = () => authenticateAndSaveStorageState(email, password, authSecret, productType);
+    const checkAuthState = () => getAuthChecker(productType)(context);
+
+    console.log(`Checking authentication state for ${productType} as ${email}`);
+    const [_, isAuthenticated] = await noTryAsync(checkAuthState, console.error);
+    if (!isAuthenticated) {
+      context.browser()?.close();
+
+      console.log(`${email} is not logged in to ${productType}`);
+      const [_, storageState] = await noTryAsync(authenticate, console.error);
+      if (!storageState) continue;
+
+      context = await createBrowserContext(storageState);
     }
-}
 
-const users = await prisma.user.findMany({ include: { productEntries: { include: { products: true } } } });
+    const products = groupedProducts.get(productType) ?? [];
+    const claim = getClaimer(productType);
 
-for (const { id: userId, email, password, productEntries, } of users) {
-    for (const { productType, storageState, authSecret, products: claimedProducts } of productEntries) {
-        logger.info(`Claiming products from ${productType} as ${email}`);
-        let context = await createBrowserContext(storageState);
+    const successfullyClaimedProducts: Product[] = [];
+    const failedToClaimProducts: Product[] = [];
+    for (let i = 0; i < products.length; i++) {
+      console.log(`${i + 1}/${products.length} Claiming ${products[i].url}`);
 
-        const authenticate = () => authenticateAndSaveStorageState(email, password, authSecret, productType);
-        const checkAuthState = () => getAuthChecker(productType)(context);
+      // obj1 != obj2, even if both are identical
+      // if (claimedProducts.includes(products[i])) {
+      if (claimedProducts.some(({ id }) => products[i].id === id)) {
+        console.log("Already claimed");
+        continue;
+      }
 
-        logger.info(`Checking authentication state for ${productType} as ${email}`);
-        const [_, isAuthenticated] = await noTryAsync(checkAuthState, logError);
-        if (!isAuthenticated) {
-            context.browser()?.close();
+      const [error] = await noTryAsync(() => claim(products[i].url, context), console.error);
 
-            logger.info(`${email} is not logged in to ${productType}`);
-            const [_, storageState] = await noTryAsync(authenticate, logError);
-            if (!storageState) continue;
-
-            context = await createBrowserContext(storageState);
+      if (!error) {
+        await noTryAsync(() => addToClaimedProducts(products[i].id, userId), console.error);
+        successfullyClaimedProducts.push(products[i]);
+      } else {
+        if (error instanceof AlreadyClaimedError) {
+          await noTryAsync(() => addToClaimedProducts(products[i].id, userId), console.error);
+          continue;
         }
 
-        const products = groupedProducts[productType];
-        const claim = getClaimer(productType);
-
-        const successfullyClaimedProducts: Product[] = [];
-        const failedToClaimProducts: Product[] = [];
-        for (let i = 0; i < products.length; i++) {
-            logger.info(`${i + 1}/${products.length} Claiming ${products[i].url}`);
-
-            // obj1 != obj2, even if both are identical
-            // if (claimedProducts.includes(products[i])) {
-            if (claimedProducts.some(({ id }) => products[i].id === id)) {
-                logger.info('Already claimed');
-                continue;
-            }
-
-            const [error] = await noTryAsync(() => claim(products[i].url, context), logError);
-
-            if (!error) {
-                await noTryAsync(() => addToClaimedProducts(products[i].id, userId, productType), logError);
-                successfullyClaimedProducts.push(products[i]);
-            } else {
-                if (error instanceof AlreadyClaimedError) {
-                    await noTryAsync(() => addToClaimedProducts(products[i].id, userId, productType), logError);
-                    continue;
-                }
-
-                failedToClaimProducts.push(products[i]);
-            }
-        }
-
-        await context.browser()?.close();
-        await noTryAsync(() => notifyFailure(email, productType, failedToClaimProducts), logError);
-        await noTryAsync(() => notifySuccess(email, productType, successfullyClaimedProducts), logError);
+        failedToClaimProducts.push(products[i]);
+      }
     }
+
+    await context.browser()?.close();
+    await noTryAsync(() => notifyFailure(email, productType, failedToClaimProducts), console.error);
+    await noTryAsync(() => notifySuccess(email, productType, successfullyClaimedProducts), console.error);
+  }
 }

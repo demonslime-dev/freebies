@@ -1,12 +1,16 @@
-name: Install Dependencies
-description: Install NPM Packages and Playwright Browser with Dependencies
+name: Install dependencies
+description: Install packages & playwright browser with dependencies
 
 runs:
   using: "composite"
   steps:
-    - name: Install NPM Packages
-      run: npm install
+    - name: Install deno
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: v2.x
+    - name: Install packages
+      run: deno install
       shell: bash
-    - name: Install Playwright Browser with Dependencies
-      run: npx -y playwright install chromium --with-deps
+    - name: Install playwright browser with dependencies
+      run: deno run -A npm:playwright install chromium --with-deps
       shell: bash

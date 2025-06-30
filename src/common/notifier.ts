@@ -1,41 +1,43 @@
-import { Product, ProductType } from '@prisma/client';
-import nodemailer from 'nodemailer';
+import env from "$common/env.ts";
+import { Product, ProductType } from "$db/types.ts";
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.MAIL_AUTH_USER,
-        pass: process.env.MAIL_AUTH_PASS,
-    },
+  service: "gmail",
+  auth: {
+    user: env.MAIL_AUTH_USER,
+    pass: env.MAIL_AUTH_PASS,
+  },
 });
 
-export const sendMail = async (to: string, subject: string, products: Product[]) => await transporter.sendMail({
-    from: `Freebies <${process.env.MAIL_AUTH_USER}>`,
+export const sendMail = async (to: string, subject: string, products: Product[]) =>
+  await transporter.sendMail({
+    from: `Freebies <${env.MAIL_AUTH_USER}>`,
     to,
     subject: subject,
     text: generateHtmlMessage(products),
     html: generateHtmlMessage(products),
-});
+  });
 
 export async function notifyUser(to: string, productType: ProductType, products: Product[], error: string) {
-    if (products.length == 0) return;
+  if (products.length == 0) return;
 
-    if (error) {
-        await sendMail(to, `Failed to claim products from ${productType}`, products);
-        return;
-    }
+  if (error) {
+    await sendMail(to, `Failed to claim products from ${productType}`, products);
+    return;
+  }
 
-    await sendMail(to, `Successfully claimed products from ${productType}`, products);
+  await sendMail(to, `Successfully claimed products from ${productType}`, products);
 }
 
 export async function notifySuccess(to: string, productType: ProductType, products: Product[]) {
-    if (products.length == 0) return;
-    await sendMail(to, `Successfully claimed products from ${productType}`, products);
+  if (products.length == 0) return;
+  await sendMail(to, `Successfully claimed products from ${productType}`, products);
 }
 
 export async function notifyFailure(to: string, productType: ProductType, products: Product[]) {
-    if (products.length == 0) return;
-    await sendMail(to, `Failed to claim products from ${productType}`, products);
+  if (products.length == 0) return;
+  await sendMail(to, `Failed to claim products from ${productType}`, products);
 }
 
 const generateHtmlMessage = (products: Product[]) => `
@@ -53,7 +55,9 @@ const generateHtmlMessage = (products: Product[]) => `
     </tr>
     </thead>
     <tbody>
-    ${products.map(({ title, url, saleEndDate }, index) => (`
+    ${products
+      .map(
+        ({ title, url, saleEndDate }, index) => `
     <tr>
         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${index + 1}</td>
         <td style="padding: 8px; border-bottom: 1px solid #ddd;">
@@ -61,7 +65,9 @@ const generateHtmlMessage = (products: Product[]) => `
         </td>
         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${saleEndDate.toDateString()}</td>
     </tr>
-    `)).join('')}
+    `,
+      )
+      .join("")}
     </tbody>
 </table>
-`
+`;
