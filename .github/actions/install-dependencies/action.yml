@@ -5,11 +5,12 @@ runs:
   using: "composite"
   steps:
     - name: Install deno
-      run: curl -fsSL https://deno.land/install.sh | sh
-      shell: bash
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: v2.x
     - name: Install packages
       run: deno install
       shell: bash
     - name: Install playwright browser with dependencies
-      run: deno run -A playwright install chromium --with-deps
+      run: deno run -A npm:playwright install chromium --with-deps
       shell: bash
