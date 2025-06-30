@@ -1,0 +1,34 @@
+{
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "auth": "deno run -A --env-file ./src/features/auth/index.ts",
+    "claim": "deno run -A --env-file ./src/features/claimer/index.ts",
+    "scrape": "deno run -A --env-file ./src/features/scraper/index.ts",
+    "experiment": "deno run -A --env-file ./src/private/experiment.ts",
+    "db:seed": "deno run -A --env-file ./src/private/createUsers.ts",
+    "db:studio": "deno run -A --env-file drizzle-kit studio",
+    "db:push": "drizzle-kit push --force",
+    "format": "prettier --write ."
+  },
+  "imports": {
+    "$db/": "./src/db/",
+    "$common/": "./src/common/",
+    "$auth/": "./src/features/auth/",
+    "$scraper/": "./src/features/scraper/",
+    "$claimer/": "./src/features/claimer/",
+    "@opentelemetry/api": "npm:@opentelemetry/api@^1.9.0",
+    "@types/luxon": "npm:@types/luxon@^3.6.2",
+    "@types/nodemailer": "npm:@types/nodemailer@^6.4.17",
+    "luxon": "npm:luxon@^3.6.1",
+    "no-try": "npm:no-try@^4.0.0",
+    "nodemailer": "npm:nodemailer@^7.0.4",
+    "otplib": "npm:otplib@^12.0.1",
+    "playwright": "npm:playwright@^1.53.1",
+    "drizzle-kit": "npm:drizzle-kit@^1.0.0-beta.1-c0277c0",
+    "drizzle-orm": "npm:drizzle-orm@^1.0.0-beta.1-c0277c0",
+    "pg": "npm:pg@^8.16.3",
+    "prettier": "npm:prettier@^3.6.2",
+    "prettier-plugin-organize-imports": "npm:prettier-plugin-organize-imports@^4.1.0",
+    "zod": "npm:zod@^3.25.67"
+  }
+}
