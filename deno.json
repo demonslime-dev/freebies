@@ -1,9 +1,9 @@
 {
   "nodeModulesDir": "auto",
   "tasks": {
-    "auth": "deno run -A --env-file ./src/features/auth/index.ts",
-    "claim": "deno run -A --env-file ./src/features/claimer/index.ts",
-    "scrape": "deno run -A --env-file ./src/features/scraper/index.ts",
+    "auth": "deno run -A ./src/features/auth/index.ts",
+    "claim": "deno run -A ./src/features/claimer/index.ts",
+    "scrape": "deno run -A ./src/features/scraper/index.ts",
     "experiment": "deno run -A --env-file ./src/private/experiment.ts",
     "db:seed": "deno run -A --env-file ./src/private/createUsers.ts",
     "db:studio": "deno run -A --env-file drizzle-kit studio",
