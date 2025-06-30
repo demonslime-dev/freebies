@@ -4,6 +4,9 @@ description: Install packages & playwright browser with dependencies
 runs:
   using: "composite"
   steps:
+    - name: Install deno
+      run: curl -fsSL https://deno.land/install.sh | sh
+      shell: bash
     - name: Install packages
       run: deno install
       shell: bash
