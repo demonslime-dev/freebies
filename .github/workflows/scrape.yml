@@ -7,6 +7,8 @@ on:
 
 env:
   DATABASE_URL: ${{secrets.DATABASE_URL}}
+  MAIL_AUTH_USER: ${{secrets.MAIL_AUTH_USER}}
+  MAIL_AUTH_PASS: ${{secrets.MAIL_AUTH_PASS}}
 
 jobs:
   Scrape:
