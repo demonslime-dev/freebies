@@ -1,9 +1,10 @@
 import { createBrowserContext } from "$common/browser.ts";
 import { ProductPropertyNotFoundError } from "$common/errors.ts";
-import { CreateProductInput } from "$db/types.ts";
-import { convertTo24HourFormat } from "$scraper/utils.scraper.ts";
+import { convertTo24HourFormat } from "$common/utils.ts";
+import { saveProduct } from "$db/index.ts";
+import { Product } from "$db/types.ts";
 
-export async function getFreeAssetsFromUnityAssetStore(): Promise<CreateProductInput[]> {
+export async function getFreeAssetsFromUnityAssetStore(): Promise<Product[]> {
   const assetUrl = "https://assetstore.unity.com/publisher-sale";
   const context = await createBrowserContext();
   try {
@@ -37,15 +38,19 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<CreateProductI
 
     console.log("1 free product retrieved");
 
-    return [
-      {
-        url: url,
-        title: title,
-        images: [imageUrl],
-        saleEndDate: new Date(dateString),
-        productType: "Unity",
-      },
-    ];
+    console.log(`Saving product to database.. ${url}`);
+    const result = await saveProduct({
+      url: url,
+      title: title,
+      images: [imageUrl],
+      saleEndDate: new Date(dateString),
+      productType: "Unity",
+    });
+
+    return [result];
+  } catch (error) {
+    console.error(error);
+    return [];
   } finally {
     await context.browser()?.close();
   }

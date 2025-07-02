@@ -1,5 +1,5 @@
-import { checkIsLoggedInToItchDotIoUsingPage } from "$auth/itch.auth.ts";
 import { AlreadyClaimedError, UnauthorizedError } from "$common/errors.ts";
+import { checkIsLoggedInToItchDotIoUsingPage } from "$itch/auth.ts";
 import { BrowserContext, Page } from "playwright";
 
 export async function claimFromItchDotIo(url: string, context: BrowserContext) {

@@ -1,5 +1,5 @@
-import { checkIsLoggedInToFabUsingPage } from "$auth/fab.auth.ts";
 import { AlreadyClaimedError, UnauthorizedError } from "$common/errors.ts";
+import { checkIsLoggedInToFabUsingPage } from "$fab/auth.ts";
 import { BrowserContext } from "playwright";
 
 export async function claimFromFab(url: string, context: BrowserContext) {

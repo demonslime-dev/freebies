@@ -1,0 +1,30 @@
+name: Main
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0,12 * * *"
+
+env:
+  DATABASE_URL: ${{secrets.DATABASE_URL}}
+  MAIL_AUTH_USER: ${{secrets.MAIL_AUTH_USER}}
+  MAIL_AUTH_PASS: ${{secrets.MAIL_AUTH_PASS}}
+
+jobs:
+  Main:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Install packages
+        run: deno install
+        shell: bash
+      - name: Install playwright browser with dependencies
+        run: deno run -A npm:playwright install chromium --with-deps
+        shell: bash
+      - name: Start
+        run: deno task start

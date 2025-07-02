@@ -1,5 +1,5 @@
-import { checkIsLoggedInToUnityAssetStoreUsingPage } from "$auth/unity.auth.ts";
 import { AlreadyClaimedError, UnauthorizedError } from "$common/errors.ts";
+import { checkIsLoggedInToUnityAssetStoreUsingPage } from "$unity/auth.ts";
 import { BrowserContext } from "playwright";
 
 export async function claimFromUnityAssetStore(url: string, context: BrowserContext) {

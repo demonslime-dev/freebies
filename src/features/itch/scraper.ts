@@ -1,7 +1,8 @@
 import { createBrowserContext } from "$common/browser.ts";
 import { ProductPropertyNotFoundError } from "$common/errors.ts";
+import { saveProduct } from "$db/index.ts";
 import { product } from "$db/schema.ts";
-import { CreateProductInput } from "$db/types.ts";
+import { Product } from "$db/types.ts";
 import { noTryAsync } from "no-try";
 import { BrowserContext } from "playwright";
 
@@ -31,7 +32,7 @@ export async function getFreeProductsFromItchDotIo() {
   return freeAssets.concat(freeGames);
 }
 
-async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<CreateProductInput[]> {
+async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<Product[]> {
   const context = await createBrowserContext();
 
   try {
@@ -59,9 +60,9 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<CreatePr
     console.log(`${freeAssetLocators.length} free products found`);
 
     const productUrls: string[] = [];
-    for (let i = 0; i < freeAssetLocators.length; i++) {
+    for (const [i, freeAssetLocator] of freeAssetLocators.entries()) {
       console.log(`${i + 1}/${freeAssetLocators.length} Getting free product URL`);
-      const productUrlLocator = freeAssetLocators[i].locator(".title.game_link");
+      const productUrlLocator = freeAssetLocator.locator(".title.game_link");
       const [error, productUrl] = await noTryAsync(() => productUrlLocator.getAttribute("href"));
 
       if (!productUrl) {
@@ -73,21 +74,26 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<CreatePr
     }
 
     await page.close();
-    const products: CreateProductInput[] = [];
-    for (let i = 0; i < productUrls.length; i++) {
-      console.log(`${i + 1}/${productUrls.length} Getting product details for ${productUrls[i]}`);
-      const [error, product] = await noTryAsync(() => getProduct(context, productUrls[i]));
+    const products: Product[] = [];
+    for (const [i, productUrl] of productUrls.entries()) {
+      console.log(`${i + 1}/${productUrls.length} Getting product details for ${productUrl}`);
+      const [error, product] = await noTryAsync(() => getProduct(context, productUrl));
 
       if (!product) {
         console.error(error, "Unable to retrieve product details");
         continue;
       }
 
-      products.push(product);
+      console.log(`Saving product to database.. ${product.url}`);
+      const result = await saveProduct(product);
+      products.push(result);
     }
 
     console.log(`${products.length} free products retrieved`);
     return products;
+  } catch (error) {
+    console.error(error);
+    return [];
   } finally {
     await context.browser()?.close();
   }

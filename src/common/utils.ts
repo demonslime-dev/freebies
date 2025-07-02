@@ -1,12 +1,7 @@
-import db from "$db/index.ts";
-import { product as p } from "$db/schema.ts";
-import { CreateProductInput } from "$db/types.ts";
+import type { Product } from "$db/types.ts";
 
-export async function saveProductToDatabase(product: CreateProductInput) {
-  await db
-    .insert(p)
-    .values(product)
-    .onConflictDoNothing({ target: [p.url, p.saleEndDate] });
+export function getUnclaimedProducts(products: Product[], claimed: Product[]) {
+  return products.filter((p) => !claimed.some(({ url }) => p.url === url));
 }
 
 export function convertTo24HourFormat(hours: string, minutes: string, period: string | "AM" | "PM") {
