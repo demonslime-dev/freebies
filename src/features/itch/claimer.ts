@@ -8,8 +8,11 @@ export async function claimFromItchDotIo(url: string, context: BrowserContext) {
     console.log("Navigating to product page");
     await page.goto(url);
 
-    if (!(await checkIsLoggedInToItchDotIoUsingPage(page))) throw new UnauthorizedError();
-    if (await page.getByText(/You own this .+/).isVisible()) throw new AlreadyClaimedError();
+    const isLoggedIn = await checkIsLoggedInToItchDotIoUsingPage(page);
+    if (!isLoggedIn) throw new UnauthorizedError();
+
+    const isClaimed = await page.getByText(/You own this .+/).isVisible();
+    if (isClaimed) throw new AlreadyClaimedError();
 
     await page.getByText("Download or claim").locator("visible=true").first().click({ timeout: 1000 });
     await page.getByText("No thanks, just take me to the downloads").click();

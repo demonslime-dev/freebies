@@ -10,18 +10,14 @@ export async function saveProduct(values: CreateProductInput): Promise<Product> 
   const [result] = await db
     .insert(product)
     .values(values)
-    .returning()
-    .onConflictDoNothing({ target: [product.url, product.saleEndDate] });
+    .onConflictDoUpdate({ target: [product.url, product.saleEndDate], set: values })
+    .returning();
 
   return result;
 }
 
 export async function addToClaimedProducts(userId: User["id"], productId: Product["id"]) {
   await db.insert(userToProduct).values({ userId, productId }).onConflictDoNothing();
-}
-
-export function getUsers() {
-  return db.query.user.findMany({ with: { authStates: true, claimedProducts: true } });
 }
 
 export default db;

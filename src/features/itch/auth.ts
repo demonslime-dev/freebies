@@ -8,7 +8,7 @@ export async function loginToItchDotIo(
   password: string,
   authSecret: string | null,
 ): Promise<StorageState> {
-  const context = await createBrowserContext({ cookies: [], origins: [] });
+  const context = await createBrowserContext();
   try {
     const page = await context.newPage();
     console.log("Navigating to login page");

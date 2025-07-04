@@ -22,7 +22,6 @@ const fabProducts = await getFreeAssetsFromFab();
 const unityProducts = await getFreeAssetsFromUnityAssetStore();
 const itchProducts = await getFreeAssetsFromItchDotIo();
 
-// const productsToClaim = await db.query.product.findMany({ where: { saleEndDate: { gt: new Date() } } });
 const productsToClaim = [...fabProducts, ...unityProducts, ...itchProducts];
 const groupedProducts = Map.groupBy(productsToClaim, (product) => product.productType);
 const users = await db.query.user.findMany({ with: { authStates: true, claimedProducts: true } });

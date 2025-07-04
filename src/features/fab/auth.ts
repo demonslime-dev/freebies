@@ -4,7 +4,7 @@ import { authenticator } from "otplib";
 import { BrowserContext, Page } from "playwright";
 
 export async function loginToFab(email: string, password: string, authSecret: string | null): Promise<StorageState> {
-  const context = await createBrowserContext({ cookies: [], origins: [] });
+  const context = await createBrowserContext();
   try {
     const page = await context.newPage();
     console.log("Navigating to login page");

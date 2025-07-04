@@ -8,8 +8,11 @@ export async function claimFromFab(url: string, context: BrowserContext) {
     console.log("Navigating to product page");
     await page.goto(url, { waitUntil: "networkidle" });
 
-    if (!(await checkIsLoggedInToFabUsingPage(page))) throw new UnauthorizedError();
-    if (await page.getByRole("link", { name: "Open in Launcher" }).isVisible()) throw new AlreadyClaimedError();
+    const isLoggedIn = await checkIsLoggedInToFabUsingPage(page);
+    if (!isLoggedIn) throw new UnauthorizedError();
+
+    const isClaimed = await page.getByRole("link", { name: "Open in Launcher" }).isVisible();
+    if (isClaimed) throw new AlreadyClaimedError();
 
     console.log("Claiming");
     await page.getByRole("button", { name: "Buy Now" }).click();

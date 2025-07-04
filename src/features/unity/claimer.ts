@@ -6,10 +6,14 @@ export async function claimFromUnityAssetStore(url: string, context: BrowserCont
   const page = await context.newPage();
   try {
     console.log("Navigating to product page");
-    await page.goto(url, { waitUntil: "load" });
+    await page.goto(url);
 
-    if (!(await checkIsLoggedInToUnityAssetStoreUsingPage(page))) throw new UnauthorizedError();
-    if (await page.getByText("You purchased this item on").isVisible()) throw new AlreadyClaimedError();
+    const isLoggedIn = await checkIsLoggedInToUnityAssetStoreUsingPage(page);
+    if (!isLoggedIn) throw new UnauthorizedError();
+
+    const isClaimed = await page.getByText("You purchased this item on").isVisible();
+    if (isClaimed) throw new AlreadyClaimedError();
+
     await page.getByRole("button", { name: "Buy Now" }).click();
 
     await page.locator('[for="vatRegisteredNo"]').click();
