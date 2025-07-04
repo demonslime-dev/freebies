@@ -1,4 +1,4 @@
-import type { StorageState } from "$common/types.ts";
+import type { StorageState } from "$db/types.ts";
 import { sql } from "drizzle-orm";
 import {
   integer,

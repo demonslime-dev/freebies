@@ -1,7 +1,14 @@
 import { createBrowserContext } from "$common/browser.ts";
 import { saveProduct } from "$db/index.ts";
 import { Product } from "$db/types.ts";
-import { DateTime } from "luxon";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat.js";
+import timezone from "dayjs/plugin/timezone.js";
+import utc from "dayjs/plugin/utc.js";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(customParseFormat);
 
 export async function getFreeAssetsFromFab(): Promise<Product[]> {
   const assetsUrl = "https://www.fab.com/limited-time-free";
@@ -11,13 +18,9 @@ export async function getFreeAssetsFromFab(): Promise<Product[]> {
     console.log(`Getting free products from ${assetsUrl}`);
     const page = await context.newPage();
     await page.goto(assetsUrl);
-    // await page.getByRole("link", { name: "Limited-Time Free", exact: true }).click();
-    await page.waitForTimeout(5000);
 
-    const saleEndDateText = await page.getByText(/Limited-Time\sFree\s\(Until.+\)/).innerText();
-    console.log(saleEndDateText);
-
-    const dateTimeIsoStr = getDateFromString(saleEndDateText);
+    const text = await page.getByText(/Limited-Time\sFree\s\(Until.+\)/).innerText();
+    const saleEndDate = await getSaleEndDate(text);
 
     const titleLocators = await page.locator("a.fabkit-Typography-root > div").all();
     const thumbnailLocators = await page.locator(".fabkit-Thumbnail-root > img").all();
@@ -46,7 +49,7 @@ export async function getFreeAssetsFromFab(): Promise<Product[]> {
         title,
         url,
         images: [imageUrl],
-        saleEndDate: new Date(dateTimeIsoStr),
+        saleEndDate: new Date(saleEndDate),
         productType: "Fab",
       });
 
@@ -63,16 +66,9 @@ export async function getFreeAssetsFromFab(): Promise<Product[]> {
   }
 }
 
-function getDateFromString(dateTimeString: string) {
-  const match = dateTimeString.match(/(\w+)\s(\d+)\sat\s(\d+):(\d+)\s(AM|PM)\s(\w+)/);
-  if (!match) throw new Error("Invalid date string");
-  const [_, month, day, hours, minutes, period] = match;
-  const year = new Date().getUTCFullYear();
-  const formattedDateTimeStr = `${year} ${month} ${day} ${hours}:${minutes} ${period}`;
-  const dateTime = DateTime.fromFormat(formattedDateTimeStr, "yyyy MMM d t").setZone("America/New_York");
-  const dateTimeIsoStr = dateTime.toUTC().toISO();
-  console.log(dateTimeIsoStr);
-
-  if (!dateTimeIsoStr) throw Error("Invalid date string");
-  return dateTimeIsoStr;
+function getSaleEndDate(text: string) {
+  const match = text.match(/\(Until\s(.+)\sET\)/);
+  if (!match) throw new Error("Unable to match sale end date");
+  const date = dayjs.tz(match[1], "MMMM D [at] h:mm A [ET]", "America/New_York");
+  return date.utc().toISOString();
 }

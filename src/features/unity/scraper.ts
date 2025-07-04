@@ -1,8 +1,15 @@
 import { createBrowserContext } from "$common/browser.ts";
 import { ProductPropertyNotFoundError } from "$common/errors.ts";
-import { convertTo24HourFormat } from "$common/utils.ts";
 import { saveProduct } from "$db/index.ts";
 import { Product } from "$db/types.ts";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat.js";
+import timezone from "dayjs/plugin/timezone.js";
+import utc from "dayjs/plugin/utc.js";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(customParseFormat);
 
 export async function getFreeAssetsFromUnityAssetStore(): Promise<Product[]> {
   const assetUrl = "https://assetstore.unity.com/publisher-sale";
@@ -13,10 +20,8 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<Product[]> {
     await page.goto(assetUrl, { waitUntil: "domcontentloaded" });
 
     console.log("Getting sale end date");
-    const endTimeText = await page.getByText("* Sale and related free asset promotion end").innerText();
-    const regex = /(\w+)\s(\d+),\s(\d+)\sat\s(\d+):(\d+)(am|pm)\s(\w+)/i;
-    const [_1, month, date, year, hours, minutes, period] = regex.exec(endTimeText)!;
-    const dateString = `${month} ${date}, ${year} ${convertTo24HourFormat(hours, minutes, period)} GMT-0700`;
+    const text = await page.getByText("* Sale and related free asset promotion end").innerText();
+    const saleEndDate = getSaleEndDate(text);
 
     const getYourGiftLocator = page.getByRole("link", {
       name: "Get your gift",
@@ -43,7 +48,7 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<Product[]> {
       url: url,
       title: title,
       images: [imageUrl],
-      saleEndDate: new Date(dateString),
+      saleEndDate: new Date(saleEndDate),
       productType: "Unity",
     });
 
@@ -54,4 +59,11 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<Product[]> {
   } finally {
     await context.browser()?.close();
   }
+}
+
+function getSaleEndDate(text: string): string {
+  const match = text.match(/end\s(.+)\sPT/);
+  if (!match) throw new Error("Unable to match sale end date");
+  const date = dayjs.tz(match[1], "MMMM D, YYYY [at] h:mma", "America/Los_Angeles");
+  return date.utc().toISOString();
 }

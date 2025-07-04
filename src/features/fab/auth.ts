@@ -1,5 +1,5 @@
 import { createBrowserContext } from "$common/browser.ts";
-import { StorageState } from "$common/types.ts";
+import { StorageState } from "$db/types.ts";
 import { authenticator } from "otplib";
 import { BrowserContext, Page } from "playwright";
 

@@ -1,4 +1,4 @@
-import { StorageState } from "$common/types.ts";
+import { StorageState } from "$db/types.ts";
 import { chromium, devices } from "playwright";
 
 const launchBrowser = async () => await chromium.launch({ headless: true });

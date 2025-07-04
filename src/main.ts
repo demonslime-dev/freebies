@@ -1,11 +1,9 @@
 import { createBrowserContext } from "$common/browser.ts";
 import { AlreadyClaimedError } from "$common/errors.ts";
 import { notifyFailure, notifySuccess } from "$common/notifier.ts";
-import { StorageState } from "$common/types.ts";
-import { getUnclaimedProducts } from "$common/utils.ts";
 import db, { addToClaimedProducts } from "$db/index.ts";
 import { authState } from "$db/schema.ts";
-import { Product, ProductType } from "$db/types.ts";
+import { Product, ProductType, StorageState } from "$db/types.ts";
 import { isLoggedInToFab, loginToFab } from "$fab/auth.ts";
 import { claimFromFab } from "$fab/claimer.ts";
 import { getFreeAssetsFromFab } from "$fab/scraper.ts";
@@ -139,4 +137,8 @@ export function getClaimer(productType: ProductType) {
     case "Fab":
       return claimFromFab;
   }
+}
+
+export function getUnclaimedProducts(products: Product[], claimed: Product[]) {
+  return products.filter((p) => !claimed.some(({ url }) => p.url === url));
 }
