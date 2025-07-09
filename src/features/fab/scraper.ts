@@ -1,6 +1,6 @@
-import { createBrowserContext } from "$common/browser.ts";
-import { saveProduct } from "$db/index.ts";
-import { Product } from "$db/types.ts";
+import { createBrowserContext } from "@/common/browser.ts";
+import { saveProduct } from "@/db/index.ts";
+import { Product } from "@/db/types.ts";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import timezone from "dayjs/plugin/timezone.js";

@@ -1,8 +1,7 @@
-import { createBrowserContext } from "$common/browser.ts";
-import { ProductPropertyNotFoundError } from "$common/errors.ts";
-import { saveProduct } from "$db/index.ts";
-import { product } from "$db/schema.ts";
-import { Product } from "$db/types.ts";
+import { createBrowserContext } from "@/common/browser.ts";
+import { ProductPropertyNotFoundError } from "@/common/errors.ts";
+import { saveProduct } from "@/db/index.ts";
+import { CreateProductInput, Product } from "@/db/types.ts";
 import { noTryAsync } from "no-try";
 import { BrowserContext } from "playwright";
 
@@ -99,7 +98,7 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<Product[
   }
 }
 
-async function getProduct(context: BrowserContext, url: string): Promise<typeof product.$inferInsert> {
+async function getProduct(context: BrowserContext, url: string): Promise<CreateProductInput> {
   const page = await context.newPage();
   try {
     await page.goto(url, { waitUntil: "domcontentloaded" });

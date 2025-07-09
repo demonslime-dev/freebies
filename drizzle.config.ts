@@ -3,7 +3,7 @@ import { defineConfig } from "drizzle-kit";
 const DATABASE_URL = Deno.env.get("DATABASE_URL");
 
 if (!DATABASE_URL) {
-  throw new Error("DATABASE_URL is not defined");
+  throw new Error("Missing DATABASE_URL environment variable");
 }
 
 export default defineConfig({

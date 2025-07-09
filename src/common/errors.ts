@@ -1,4 +1,4 @@
-import { Product } from "$db/types.ts";
+import { Product } from "@/db/types.ts";
 
 class BaseError extends Error {
   constructor(message: string, options?: ErrorOptions) {

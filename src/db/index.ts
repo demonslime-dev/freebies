@@ -1,7 +1,7 @@
-import env from "$common/env.ts";
-import { relations } from "$db/relations.ts";
-import { product, userToProduct } from "$db/schema.ts";
-import { CreateProductInput, Product, User } from "$db/types.ts";
+import env from "@/common/env.ts";
+import { relations } from "@/db/relations.ts";
+import { product, userToProduct } from "@/db/schema.ts";
+import { CreateProductInput, Product, User } from "@/db/types.ts";
 import { drizzle } from "drizzle-orm/node-postgres";
 
 const db = drizzle(env.DATABASE_URL, { relations });

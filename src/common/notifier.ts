@@ -1,5 +1,5 @@
-import env from "$common/env.ts";
-import { Product, ProductType } from "$db/types.ts";
+import env from "@/common/env.ts";
+import { Product, ProductType } from "@/db/types.ts";
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({

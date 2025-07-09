@@ -1,4 +1,4 @@
-import { authState, product, user, userToProduct } from "$db/schema.ts";
+import { authState, product, user, userToProduct } from "@/db/schema.ts";
 import { defineRelations } from "drizzle-orm";
 
 export const relations = defineRelations({ authState, product, user, userToProduct }, (r) => ({

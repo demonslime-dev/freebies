@@ -1,4 +1,4 @@
-import { authState, product, productType, user } from "$db/schema.ts";
+import { authState, product, productType, user } from "@/db/schema.ts";
 
 export type Product = typeof product.$inferSelect;
 

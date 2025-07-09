@@ -9,11 +9,11 @@
     "format": "prettier --write ."
   },
   "imports": {
-    "$db/": "./src/db/",
-    "$common/": "./src/common/",
-    "$fab/": "./src/features/fab/",
-    "$unity/": "./src/features/unity/",
-    "$itch/": "./src/features/itch/",
+    "@/db/": "./src/db/",
+    "@/common/": "./src/common/",
+    "@/fab/": "./src/features/fab/",
+    "@/unity/": "./src/features/unity/",
+    "@/itch/": "./src/features/itch/",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
     "@types/nodemailer": "npm:@types/nodemailer@^6.4.17",
     "dayjs": "npm:dayjs@^1.11.13",
