@@ -16,10 +16,10 @@ val tauriProperties = Properties().apply {
 
 android {
     compileSdk = 34
-    namespace = "com.freebies.app"
+    namespace = "com.freebies.client"
     defaultConfig {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
-        applicationId = "com.freebies.app"
+        applicationId = "com.freebies.client"
         minSdk = 24
         targetSdk = 34
         versionCode = tauriProperties.getProperty("tauri.android.versionCode", "1").toInt()

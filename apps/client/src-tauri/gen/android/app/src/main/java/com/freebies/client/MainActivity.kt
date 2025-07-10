@@ -1,3 +1,3 @@
-package com.freebies.app
+package com.freebies.client
 
 class MainActivity : TauriActivity()

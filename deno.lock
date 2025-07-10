@@ -15,7 +15,6 @@
     "npm:pg@^8.16.3": "8.16.3",
     "npm:playwright@^1.53.2": "1.53.2",
     "npm:prettier-plugin-organize-imports@^4.1.0": "4.1.0_prettier@3.6.2_typescript@5.8.3",
-    "npm:prettier@*": "3.6.2",
     "npm:prettier@^3.6.2": "3.6.2",
     "npm:zod@^3.25.73": "3.25.75"
   },
