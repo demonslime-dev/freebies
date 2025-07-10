@@ -1,9 +1,7 @@
 name: Deploy
 on:
   push:
-    branches: main
-  pull_request:
-    branches: main
+    branches: [main]
 
 jobs:
   deploy:
@@ -23,11 +21,6 @@ jobs:
         with:
           deno-version: v2.x
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-
       - name: Install step
         run: "deno install"
 
@@ -37,5 +30,3 @@ jobs:
           project: "freebies"
           entrypoint: "apps/server/main.ts"
           root: ""
-          
-          
