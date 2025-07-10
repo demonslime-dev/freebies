@@ -33,7 +33,7 @@
     },
   });
 
-  const { form: formData, enhance } = form;
+  const { form: formData, submitting, enhance } = form;
 </script>
 
 <form method="POST" use:enhance class="space-y-4">
@@ -46,5 +46,5 @@
     <Form.Description />
     <Form.FieldErrors />
   </Form.Field>
-  <Form.Button class="w-full">Apply</Form.Button>
+  <Form.Button class="w-full" disabled={$submitting}>Apply</Form.Button>
 </form>

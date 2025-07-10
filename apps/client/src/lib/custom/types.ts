@@ -1,3 +1,6 @@
+import type z from "zod";
+import type { formSchema } from "./schema";
+
 type FailResponse = {
   status: "fail";
   message: string;
@@ -5,16 +8,9 @@ type FailResponse = {
 
 type SuccessResponse = {
   status: "success";
-  data?: {
-    name: string;
-    email: string;
-    password: string;
-    authSecrets: {
-      Fab?: string;
-      Unity?: string;
-      Itch?: string;
-    };
-  };
+  data?: Data;
 };
+
+type Data = z.infer<typeof formSchema>;
 
 export type ApiResponse = FailResponse | SuccessResponse;

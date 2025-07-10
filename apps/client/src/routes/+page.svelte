@@ -10,6 +10,7 @@
 
   const { data }: PageProps = $props();
 
+  if (!data.form) throw Error("form data is undefined");
   const form = superForm(data.form, {
     validators: zodClient(formSchema),
     dataType: "json",
@@ -40,7 +41,7 @@
     },
   });
 
-  const { form: formData, enhance } = form;
+  const { form: formData, submitting, enhance } = form;
 </script>
 
 <form method="POST" use:enhance class="space-y-4">
@@ -99,5 +100,5 @@
     <Form.Description />
     <Form.FieldErrors />
   </Form.Field>
-  <Form.Button class="w-full">Save</Form.Button>
+  <Form.Button class="w-full" disabled={$submitting}>Save</Form.Button>
 </form>
