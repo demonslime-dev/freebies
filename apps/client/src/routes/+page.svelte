@@ -36,7 +36,7 @@
           alert("Fail");
         }
       } catch (error) {
-        alert("Something went wrong, please check your internet connection");
+        alert("Something went wrong,\nplease check your internet connection");
       }
     },
   });

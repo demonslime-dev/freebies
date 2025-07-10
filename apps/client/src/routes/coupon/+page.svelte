@@ -28,7 +28,7 @@
         }
       } catch (error) {
         localStorage.removeItem("code");
-        alert("Something went wrong, please check your internet connection");
+        alert("Something went wrong,\nplease check your internet connection");
       }
     },
   });
