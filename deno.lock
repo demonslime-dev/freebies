@@ -2,20 +2,22 @@
   "version": "5",
   "specifiers": {
     "jsr:@std/dotenv@~0.225.5": "0.225.5",
+    "npm:@hono/node-server@^1.15.0": "1.15.0_hono@4.8.4",
     "npm:@types/nodemailer@^6.4.17": "6.4.17",
+    "npm:@types/pg@^8.15.4": "8.15.4",
     "npm:dayjs@^1.11.13": "1.11.13",
     "npm:drizzle-kit@^1.0.0-beta.1-c0277c0": "1.0.0-beta.1-fd5d1e8_esbuild@0.19.12",
-    "npm:drizzle-orm@^1.0.0-beta.1-c0277c0": "1.0.0-beta.1-fd5d1e8_pg@8.16.3",
+    "npm:drizzle-orm@^1.0.0-beta.1-c0277c0": "1.0.0-beta.1-fd5d1e8_@types+pg@8.15.4_pg@8.16.3",
+    "npm:hono@^4.8.4": "4.8.4",
     "npm:no-try@4": "4.0.0",
     "npm:nodemailer@^7.0.4": "7.0.4",
     "npm:otplib@^12.0.1": "12.0.1",
     "npm:pg@^8.16.3": "8.16.3",
-    "npm:playwright@*": "1.53.2",
     "npm:playwright@^1.53.2": "1.53.2",
     "npm:prettier-plugin-organize-imports@^4.1.0": "4.1.0_prettier@3.6.2_typescript@5.8.3",
-    "npm:prettier@3.6.2": "3.6.2",
+    "npm:prettier@*": "3.6.2",
     "npm:prettier@^3.6.2": "3.6.2",
-    "npm:zod@^3.25.73": "3.25.73"
+    "npm:zod@^3.25.73": "3.25.75"
   },
   "jsr": {
     "@std/dotenv@0.225.5": {
@@ -267,6 +269,12 @@
       "os": ["win32"],
       "cpu": ["x64"]
     },
+    "@hono/node-server@1.15.0_hono@4.8.4": {
+      "integrity": "sha512-MjmK4l5N4dQpZ9OSWN0tCj7ejuc7WvuWMzSKtc89bnknJykAeHxzRigXBTYZk85H6Awrii6RM59iUiUluApu2A==",
+      "dependencies": [
+        "hono"
+      ]
+    },
     "@otplib/core@12.0.1": {
       "integrity": "sha512-4sGntwbA/AC+SbPhbsziRiD+jNDdIzsZ3JUyfZwjtKyc/wufl1pnSIaG4Uqx8ymPagujub0o92kgBnB89cuAMA=="
     },
@@ -314,6 +322,14 @@
         "@types/node"
       ]
     },
+    "@types/pg@8.15.4": {
+      "integrity": "sha512-I6UNVBAoYbvuWkkU3oosC8yxqH21f4/Jc4DK71JLG3dT2mdlGe1z+ep/LQGXaKaOgcvUrsQoPRqfgtMcvZiJhg==",
+      "dependencies": [
+        "@types/node",
+        "pg-protocol",
+        "pg-types"
+      ]
+    },
     "buffer-from@1.1.2": {
       "integrity": "sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ=="
     },
@@ -337,12 +353,14 @@
       ],
       "bin": true
     },
-    "drizzle-orm@1.0.0-beta.1-fd5d1e8_pg@8.16.3": {
+    "drizzle-orm@1.0.0-beta.1-fd5d1e8_@types+pg@8.15.4_pg@8.16.3": {
       "integrity": "sha512-p/6rhE/MU3qD61sYOiUW9u6EM3S+GspByTzpgDHwzv9s7JEMSmfcDrFa4eyRSWCczx6/IC2AnB4SJt6uM0xydQ==",
       "dependencies": [
+        "@types/pg",
         "pg"
       ],
       "optionalPeers": [
+        "@types/pg",
         "pg"
       ]
     },
@@ -437,6 +455,9 @@
       "dependencies": [
         "resolve-pkg-maps"
       ]
+    },
+    "hono@4.8.4": {
+      "integrity": "sha512-KOIBp1+iUs0HrKztM4EHiB2UtzZDTBihDtOF5K6+WaJjCPeaW4Q92R8j63jOhvJI5+tZSMuKD9REVEXXY9illg=="
     },
     "isexe@3.1.1": {
       "integrity": "sha512-LpB/54B+/2J5hqQ7imZHfdU31OlgQqx7ZicVlkm9kzg9/w8GKLEcFfJl/t7DCEDueOyBAD6zCCwTO6Fzs0NoEQ=="
@@ -588,25 +609,45 @@
     "xtend@4.0.2": {
       "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
     },
-    "zod@3.25.73": {
-      "integrity": "sha512-fuIKbQAWQl22Ba5d1quwEETQYjqnpKVyZIWAhbnnHgnDd3a+z4YgEfkI5SZ2xMELnLAXo/Flk2uXgysZNf0uaA=="
+    "zod@3.25.75": {
+      "integrity": "sha512-OhpzAmVzabPOL6C3A3gpAifqr9MqihV/Msx3gor2b2kviCgcb+HM9SEOpMWwwNp9MRunWnhtAKUoo0AHhjyPPg=="
     }
   },
   "workspace": {
     "dependencies": [
-      "jsr:@std/dotenv@~0.225.5",
-      "npm:@types/nodemailer@^6.4.17",
-      "npm:dayjs@^1.11.13",
       "npm:drizzle-kit@^1.0.0-beta.1-c0277c0",
       "npm:drizzle-orm@^1.0.0-beta.1-c0277c0",
-      "npm:no-try@4",
-      "npm:nodemailer@^7.0.4",
-      "npm:otplib@^12.0.1",
-      "npm:pg@^8.16.3",
-      "npm:playwright@^1.53.2",
       "npm:prettier-plugin-organize-imports@^4.1.0",
-      "npm:prettier@^3.6.2",
-      "npm:zod@^3.25.73"
-    ]
+      "npm:prettier@^3.6.2"
+    ],
+    "members": {
+      "apps/claimer": {
+        "dependencies": [
+          "jsr:@std/dotenv@~0.225.5",
+          "npm:@types/nodemailer@^6.4.17",
+          "npm:dayjs@^1.11.13",
+          "npm:no-try@4",
+          "npm:nodemailer@^7.0.4",
+          "npm:otplib@^12.0.1",
+          "npm:pg@^8.16.3",
+          "npm:playwright@^1.53.2",
+          "npm:prettier@^3.6.2",
+          "npm:zod@^3.25.73"
+        ]
+      },
+      "apps/server": {
+        "dependencies": [
+          "npm:@hono/node-server@^1.15.0",
+          "npm:hono@^4.8.4"
+        ]
+      },
+      "packages/db": {
+        "dependencies": [
+          "jsr:@std/dotenv@~0.225.5",
+          "npm:@types/pg@^8.15.4",
+          "npm:pg@^8.16.3"
+        ]
+      }
+    }
   }
 }

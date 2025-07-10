@@ -1,31 +1,10 @@
 {
   "nodeModulesDir": "auto",
-  "tasks": {
-    "start": "deno run -A ./src/main.ts",
-    "experiment": "deno run -A --env-file ./src/private/experiment.ts",
-    "db:seed": "deno run -A --env-file ./src/private/createUsers.ts",
-    "db:studio": "deno run -A --env-file drizzle-kit studio",
-    "db:push": "drizzle-kit push --force",
-    "format": "prettier --write ."
-  },
+  "workspace": ["packages/*", "apps/claimer", "apps/server"],
   "imports": {
-    "@/db/": "./src/db/",
-    "@/common/": "./src/common/",
-    "@/fab/": "./src/features/fab/",
-    "@/unity/": "./src/features/unity/",
-    "@/itch/": "./src/features/itch/",
-    "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
-    "@types/nodemailer": "npm:@types/nodemailer@^6.4.17",
-    "dayjs": "npm:dayjs@^1.11.13",
-    "no-try": "npm:no-try@^4.0.0",
-    "nodemailer": "npm:nodemailer@^7.0.4",
-    "otplib": "npm:otplib@^12.0.1",
-    "playwright": "npm:playwright@^1.53.2",
     "drizzle-kit": "npm:drizzle-kit@^1.0.0-beta.1-c0277c0",
     "drizzle-orm": "npm:drizzle-orm@^1.0.0-beta.1-c0277c0",
-    "pg": "npm:pg@^8.16.3",
     "prettier": "npm:prettier@^3.6.2",
-    "prettier-plugin-organize-imports": "npm:prettier-plugin-organize-imports@^4.1.0",
-    "zod": "npm:zod@^3.25.73"
+    "prettier-plugin-organize-imports": "npm:prettier-plugin-organize-imports@^4.1.0"
   }
 }

@@ -1,0 +1,19 @@
+{
+  "name": "@freebies/db",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./schema": "./src/schema.ts",
+    "./relations": "./src/relations.ts"
+  },
+  "tasks": {
+    "db:push": "deno run -A --env-file drizzle-kit push",
+    "db:studio": "deno run -A --env-file drizzle-kit studio",
+    "db:seed": "deno run -A ./src/private/createUsers.ts"
+  },
+  "imports": {
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
+    "@types/pg": "npm:@types/pg@^8.15.4",
+    "pg": "npm:pg@^8.16.3"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "tasks": {
+    "start": "deno run -A ./main.ts"
+  },
+  "imports": {
+    "@hono/node-server": "npm:@hono/node-server@^1.15.0",
+    "hono": "npm:hono@^4.8.4"
+  }
+}

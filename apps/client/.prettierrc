@@ -1,0 +1,6 @@
+{
+  "printWidth": 120,
+  "tailwindStylesheet": "./src/app.css",
+  "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss", "prettier-plugin-svelte"],
+  "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }]
+}
