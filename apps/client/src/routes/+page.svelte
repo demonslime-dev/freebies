@@ -10,7 +10,6 @@
 
   const { data }: PageProps = $props();
 
-  if (!data.form) throw Error("form data is undefined");
   const form = superForm(data.form, {
     validators: zodClient(formSchema),
     dataType: "json",
