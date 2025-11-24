@@ -1,5 +1,5 @@
 import type { StorageState } from "@freebies/db/types";
-import { chromium, devices } from "patchright";
+import { chromium } from "patchright";
 
 const launchBrowser = async () => {
   return await chromium.launch({
@@ -12,7 +12,7 @@ export const createBrowserContext = async (storageState?: StorageState | null) =
   const browser = await launchBrowser();
 
   return await browser.newContext({
-    ...devices["Desktop Chrome"],
+    viewport: null,
     storageState: storageState ?? undefined,
   });
 };
