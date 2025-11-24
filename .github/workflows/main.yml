@@ -22,7 +22,7 @@ jobs:
           deno-version: v2.x
       - name: Install packages
         run: deno install
-      - name: Install playwright browser with dependencies
-        run: deno run -A npm:patchright install chrome --with-deps
+      - name: Install patchwright browser with dependencies
+        run: npx patchright install chrome --with-deps
       - name: Change to claimer directory & start claimer
         run: cd apps/claimer && deno task start
