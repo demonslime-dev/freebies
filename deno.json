@@ -2,8 +2,8 @@
   "nodeModulesDir": "auto",
   "workspace": ["packages/*", "apps/claimer", "apps/server"],
   "imports": {
-    "drizzle-kit": "npm:drizzle-kit@^1.0.0-beta.1-fd8bfcc",
-    "drizzle-orm": "npm:drizzle-orm@^1.0.0-beta.1-fd8bfcc",
+    "drizzle-kit": "npm:drizzle-kit@^1.0.0-beta.1-4e7eaa6",
+    "drizzle-orm": "npm:drizzle-orm@^1.0.0-beta.1-4e7eaa6",
     "prettier": "npm:prettier@^3.6.2",
     "prettier-plugin-organize-imports": "npm:prettier-plugin-organize-imports@^4.3.0"
   }

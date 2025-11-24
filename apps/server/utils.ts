@@ -1,7 +1,7 @@
 import { db } from "@freebies/db";
 import { authState, coupon, user } from "@freebies/db/schema";
 import type { ProductType, User } from "@freebies/db/types";
-import { eq } from "drizzle-orm/expressions";
+import { eq } from "drizzle-orm";
 
 export async function updateCoupon(couponId: number, userId: User["id"]) {
   await db.update(coupon).set({ userId }).where(eq(coupon.id, couponId));
