@@ -1,6 +1,6 @@
 import { AlreadyClaimedError, UnauthorizedError } from "@/common/errors.ts";
 import { checkIsLoggedInToUnityAssetStoreUsingPage } from "@/unity/auth.ts";
-import { BrowserContext } from "playwright";
+import { BrowserContext } from "patchright";
 
 export async function claimFromUnityAssetStore(url: string, context: BrowserContext) {
   const page = await context.newPage();

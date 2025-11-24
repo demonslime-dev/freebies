@@ -3,7 +3,7 @@ import { ProductPropertyNotFoundError } from "@/common/errors.ts";
 import { saveProduct } from "@/common/utils.ts";
 import type { CreateProductInput, Product } from "@freebies/db/types";
 import { noTryAsync } from "no-try";
-import { BrowserContext } from "playwright";
+import { BrowserContext } from "patchright";
 
 type AlbumsSaleUrl = "https://itch.io/soundtracks/on-sale";
 type AssetsSaleUrl = "https://itch.io/game-assets/on-sale";

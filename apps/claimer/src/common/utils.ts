@@ -7,7 +7,7 @@ import { claimFromUnityAssetStore } from "@/unity/claimer.ts";
 import { db } from "@freebies/db";
 import { authState, product, userToProduct } from "@freebies/db/schema";
 import type { CreateProductInput, Product, ProductType, StorageState, User } from "@freebies/db/types";
-import { BrowserContext } from "playwright";
+import { BrowserContext } from "patchright";
 
 export async function saveProduct(values: CreateProductInput): Promise<Product> {
   const [result] = await db

@@ -12,8 +12,9 @@
     "npm:no-try@4": "4.0.0",
     "npm:nodemailer@^7.0.4": "7.0.10",
     "npm:otplib@^12.0.1": "12.0.1",
+    "npm:patchright@*": "1.56.1",
+    "npm:patchright@^1.56.1": "1.56.1",
     "npm:pg@^8.16.3": "8.16.3",
-    "npm:playwright@^1.53.2": "1.56.1",
     "npm:prettier-plugin-organize-imports@^4.3.0": "4.3.0_prettier@3.6.2_typescript@5.9.3",
     "npm:prettier@^3.6.2": "3.6.2",
     "npm:zod@^3.25.73": "3.25.76"
@@ -1260,6 +1261,20 @@
         "@otplib/preset-v11"
       ]
     },
+    "patchright-core@1.56.1": {
+      "integrity": "sha512-ot1WU31T+FLjBg8LUbEnPPhzh6uRYji25ZONHpxVUEXtANuVJf6tI4nv6jw6n37qsjgS4u12sq7Go0Vdte3JJQ==",
+      "bin": true
+    },
+    "patchright@1.56.1": {
+      "integrity": "sha512-HY4s3vJNPVoasoy0X7sOm2dufQwlicvXoCpoINYFUWYkEaSBM2l4UtSOdI4/MYQHNskfOFpIqE+Usj748qbtYg==",
+      "dependencies": [
+        "patchright-core"
+      ],
+      "optionalDependencies": [
+        "fsevents"
+      ],
+      "bin": true
+    },
     "pg-cloudflare@1.2.7": {
       "integrity": "sha512-YgCtzMH0ptvZJslLM1ffsY4EuGaU0cx4XSdXLRFae8bPP4dS5xL1tNB3k2o/N64cHJpwU7dxKli/nZ2lUa5fLg=="
     },
@@ -1306,20 +1321,6 @@
       "dependencies": [
         "split2"
       ]
-    },
-    "playwright-core@1.56.1": {
-      "integrity": "sha512-hutraynyn31F+Bifme+Ps9Vq59hKuUCz7H1kDOcBs+2oGguKkWTU50bBWrtz34OUWmIwpBTWDxaRPXrIXkgvmQ==",
-      "bin": true
-    },
-    "playwright@1.56.1": {
-      "integrity": "sha512-aFi5B0WovBHTEvpM3DzXTUaeN6eN0qWnTkKx4NQaH4Wvcmc153PdaY2UBdSYKaGYw+UyWXSVyxDUg5DoPEttjw==",
-      "dependencies": [
-        "playwright-core"
-      ],
-      "optionalDependencies": [
-        "fsevents"
-      ],
-      "bin": true
     },
     "postgres-array@2.0.0": {
       "integrity": "sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA=="
@@ -1402,8 +1403,8 @@
           "npm:no-try@4",
           "npm:nodemailer@^7.0.4",
           "npm:otplib@^12.0.1",
+          "npm:patchright@^1.56.1",
           "npm:pg@^8.16.3",
-          "npm:playwright@^1.53.2",
           "npm:prettier@^3.6.2",
           "npm:zod@^3.25.73"
         ]

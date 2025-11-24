@@ -1,7 +1,7 @@
 import { createBrowserContext } from "@/common/browser.ts";
 import type { StorageState } from "@freebies/db/types";
 import { authenticator } from "otplib";
-import { BrowserContext, Page } from "playwright";
+import { BrowserContext, Page } from "patchright";
 
 export async function loginToFab(email: string, password: string, authSecret: string | null): Promise<StorageState> {
   const context = await createBrowserContext();
