@@ -8,12 +8,12 @@
   },
   "tasks": {
     "db:push": "deno run -A --env-file drizzle-kit push --force",
-    "db:studio": "deno run -A --env-file drizzle-kit studio",
+    "db:studio": "deno run -A --env-file drizzle-kit studio --verbose",
     "db:seed": "deno run -A ./src/private/createUsers.ts"
   },
   "imports": {
     "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
-    "@types/pg": "npm:@types/pg@^8.15.4",
+    "@types/pg": "npm:@types/pg@^8.15.6",
     "pg": "npm:pg@^8.16.3"
   }
 }
