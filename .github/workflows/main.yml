@@ -23,6 +23,6 @@ jobs:
       - name: Install packages
         run: deno install
       - name: Install patchwright browser with dependencies
-        run: npx patchright install chrome --with-deps
+        run: npx patchright install chrome --with-deps --force
       - name: Change to claimer directory & start claimer
         run: cd apps/claimer && deno task start
