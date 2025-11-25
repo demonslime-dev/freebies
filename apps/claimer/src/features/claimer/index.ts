@@ -20,6 +20,16 @@ const users = await db.query.user.findMany({ with: { authStates: true, claimedPr
 for (const { id: userId, email, password, authStates, claimedProducts } of users) {
   for (const { productType, storageState, authSecret } of authStates) {
     console.log(`Claiming products from ${productType} as ${email}`);
+
+    const products = groupedProducts.get(productType) ?? [];
+    const unclaimedProducts = getUnclaimedProducts(products, claimedProducts);
+    const claim = getClaimer(productType);
+
+    if (unclaimedProducts.length === 0) {
+      console.log("No products to claim");
+      continue;
+    }
+
     let context = await createBrowserContext(storageState);
 
     const authenticate = () => authenticateAndSaveStorageState(email, password, authSecret, productType);
@@ -36,10 +46,6 @@ for (const { id: userId, email, password, authStates, claimedProducts } of users
 
       context = await createBrowserContext(storageState);
     }
-
-    const products = groupedProducts.get(productType) ?? [];
-    const unclaimedProducts = getUnclaimedProducts(products, claimedProducts);
-    const claim = getClaimer(productType);
 
     const successfullyClaimedProducts: Product[] = [];
     const failedToClaimProducts: Product[] = [];
