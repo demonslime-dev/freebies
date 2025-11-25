@@ -39,11 +39,8 @@ jobs:
       - name: Install patchwright browser with dependencies
         run: npx patchright install chrome --with-deps
 
-      - name: Change current working directory
-        run: cd apps/claimer
-
       - name: Start scraper
-        run: deno task scrape
+        run: cd apps/claimer && deno task scrape
 
       - name: Start claimer
-        run: deno task claim
+        run: cd apps/claimer && deno task claim
