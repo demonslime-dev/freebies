@@ -50,7 +50,7 @@ for (const { id: userId, email, password, authStates, claimedProducts } of users
     const successfullyClaimedProducts: Product[] = [];
     const failedToClaimProducts: Product[] = [];
     for (const [i, product] of unclaimedProducts.entries()) {
-      console.log(`${i + 1}/${products.length} Claiming ${product.url}`);
+      console.log(`${i + 1}/${unclaimedProducts.length} Claiming ${product.url}`);
 
       if (claimedProducts.some(({ id }) => product.id === id)) {
         console.log("Already claimed");
