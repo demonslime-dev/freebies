@@ -6,20 +6,14 @@ import {
   authenticateAndSaveStorageState,
   getAuthChecker,
   getClaimer,
+  getProductsToClaim,
   getUnclaimedProducts,
 } from "@/common/utils.ts";
-import { getFreeAssetsFromFab } from "@/fab/scraper.ts";
-import { getFreeAssetsFromItchDotIo } from "@/itch/scraper.ts";
-import { getFreeAssetsFromUnityAssetStore } from "@/unity/scraper.ts";
 import { db } from "@freebies/db";
 import type { Product } from "@freebies/db/types";
 import { noTryAsync } from "no-try";
 
-const fabProducts = await getFreeAssetsFromFab();
-const unityProducts = await getFreeAssetsFromUnityAssetStore();
-const itchProducts = await getFreeAssetsFromItchDotIo();
-
-const productsToClaim = [...fabProducts, ...unityProducts, ...itchProducts];
+const productsToClaim = await getProductsToClaim();
 const groupedProducts = Map.groupBy(productsToClaim, (product) => product.productType);
 const users = await db.query.user.findMany({ with: { authStates: true, claimedProducts: true } });
 

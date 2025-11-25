@@ -1,7 +1,6 @@
 import { createBrowserContext } from "@/common/browser.ts";
 import { ProductPropertyNotFoundError } from "@/common/errors.ts";
-import { saveProduct } from "@/common/utils.ts";
-import type { CreateProductInput, Product } from "@freebies/db/types";
+import type { CreateProductInput } from "@freebies/db/types";
 import { noTryAsync } from "no-try";
 import { BrowserContext } from "patchright";
 
@@ -31,7 +30,7 @@ export async function getFreeProductsFromItchDotIo() {
   return freeAssets.concat(freeGames);
 }
 
-async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<Product[]> {
+async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<CreateProductInput[]> {
   const context = await createBrowserContext();
 
   try {
@@ -73,7 +72,7 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<Product[
     }
 
     await page.close();
-    const products: Product[] = [];
+    const products: CreateProductInput[] = [];
     for (const [i, productUrl] of productUrls.entries()) {
       console.log(`${i + 1}/${productUrls.length} Getting product details for ${productUrl}`);
       const [error, product] = await noTryAsync(() => getProduct(context, productUrl));
@@ -83,9 +82,7 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<Product[
         continue;
       }
 
-      console.log(`Saving product to database.. ${product.url}`);
-      const result = await saveProduct(product);
-      products.push(result);
+      products.push(product);
     }
 
     console.log(`${products.length} free products retrieved`);

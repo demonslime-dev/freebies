@@ -1,6 +1,5 @@
 import { createBrowserContext } from "@/common/browser.ts";
-import { saveProduct } from "@/common/utils.ts";
-import type { Product } from "@freebies/db/types";
+import type { CreateProductInput } from "@freebies/db/types";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import timezone from "dayjs/plugin/timezone.js";
@@ -10,7 +9,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(customParseFormat);
 
-export async function getFreeAssetsFromFab(): Promise<Product[]> {
+export async function getFreeAssetsFromFab(): Promise<CreateProductInput[]> {
   const assetsUrl = "https://www.fab.com/limited-time-free";
   const context = await createBrowserContext();
 
@@ -26,7 +25,7 @@ export async function getFreeAssetsFromFab(): Promise<Product[]> {
     const thumbnailLocators = await page.locator(".fabkit-Thumbnail-root > img").all();
     console.log(`${thumbnailLocators.length} free products found`);
 
-    const products: Product[] = [];
+    const products: CreateProductInput[] = [];
     for (const [i, thumbnailLocator] of thumbnailLocators.entries()) {
       const title = await titleLocators[i].innerText();
       let url = await titleLocators[i].locator("..").getAttribute("href");
@@ -44,16 +43,13 @@ export async function getFreeAssetsFromFab(): Promise<Product[]> {
         continue;
       }
 
-      console.log(`Saving product to database.. ${url}`);
-      const product = await saveProduct({
+      products.push({
         title,
         url,
         images: [imageUrl],
         saleEndDate: new Date(saleEndDate),
         productType: "Fab",
       });
-
-      products.push(product);
     }
 
     console.log(`${products.length} free products retrieved`);

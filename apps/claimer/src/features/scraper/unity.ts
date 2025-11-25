@@ -1,7 +1,6 @@
 import { createBrowserContext } from "@/common/browser.ts";
 import { ProductPropertyNotFoundError } from "@/common/errors.ts";
-import { saveProduct } from "@/common/utils.ts";
-import type { Product } from "@freebies/db/types";
+import type { CreateProductInput } from "@freebies/db/types";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import timezone from "dayjs/plugin/timezone.js";
@@ -11,7 +10,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(customParseFormat);
 
-export async function getFreeAssetsFromUnityAssetStore(): Promise<Product[]> {
+export async function getFreeAssetsFromUnityAssetStore(): Promise<CreateProductInput[]> {
   const assetUrl = "https://assetstore.unity.com/publisher-sale";
   const context = await createBrowserContext();
   try {
@@ -43,16 +42,15 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<Product[]> {
 
     console.log("1 free product retrieved");
 
-    console.log(`Saving product to database.. ${url}`);
-    const result = await saveProduct({
-      url: url,
-      title: title,
-      images: [imageUrl],
-      saleEndDate: new Date(saleEndDate),
-      productType: "Unity",
-    });
-
-    return [result];
+    return [
+      {
+        url: url,
+        title: title,
+        images: [imageUrl],
+        saleEndDate: new Date(saleEndDate),
+        productType: "Unity",
+      },
+    ];
   } catch (error) {
     console.error(error);
     return [];

@@ -89,3 +89,7 @@ export function getClaimer(productType: ProductType) {
 export function getUnclaimedProducts(products: Product[], claimed: Product[]) {
   return products.filter((p) => !claimed.some(({ url }) => p.url === url));
 }
+
+export function getProductsToClaim() {
+  return db.query.product.findMany({ where: { saleEndDate: { gt: new Date() } } });
+}

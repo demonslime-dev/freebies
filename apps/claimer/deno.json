@@ -1,14 +1,16 @@
 {
   "tasks": {
-    "start": "deno run -A ./src/main.ts",
+    "scrape": "deno run -A ./src/features/scraper/index.ts",
+    "claim": "deno run -A ./src/features/claimer/index.ts",
     "experiment": "deno run -A --env-file ./src/private/experiment.ts",
     "format": "prettier --write ."
   },
   "imports": {
     "@/common/": "./src/common/",
-    "@/fab/": "./src/features/fab/",
-    "@/unity/": "./src/features/unity/",
-    "@/itch/": "./src/features/itch/",
+    "@/scraper/": "./src/features/scraper/",
+    "@/fab/": "./src/features/claimer/fab/",
+    "@/unity/": "./src/features/claimer/unity/",
+    "@/itch/": "./src/features/claimer/itch/",
     "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
     "@types/nodemailer": "npm:@types/nodemailer@^6.4.17",
     "dayjs": "npm:dayjs@^1.11.13",
