@@ -11,8 +11,8 @@ env:
   MAIL_AUTH_PASS: ${{secrets.MAIL_AUTH_PASS}}
 
 jobs:
-  main:
-    name: Scrape & Claim
+  scrape:
+    name: Scrape
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -41,6 +41,35 @@ jobs:
 
       - name: Start scraper
         run: cd apps/claimer && deno task scrape
+
+  claim:
+    name: Claim
+    runs-on: ubuntu-22.04
+    needs: scrape
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Cache Deno dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/deno
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-deno-${{ hashFiles('**/deno.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-deno-
+
+      - name: Install packages
+        run: deno install
+
+      - name: Install patchwright browser with dependencies
+        run: npx patchright install chrome --with-deps
 
       - name: Start claimer
         run: cd apps/claimer && deno task claim
