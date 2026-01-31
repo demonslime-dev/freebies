@@ -1,4 +1,9 @@
 {
+  "name": "@freebies/claimer",
+  "exports": {
+    "./claimer": "./src/features/claimer/index.ts",
+    "./scraper": "./src/features/scraper/index.ts"
+  },
   "tasks": {
     "scrape": "deno run -A ./src/features/scraper/index.ts",
     "claim": "deno run -A ./src/features/claimer/index.ts",

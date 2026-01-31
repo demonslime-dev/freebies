@@ -2,7 +2,7 @@ import { createBrowserContext } from "@/common/browser.ts";
 import { ProductPropertyNotFoundError } from "@/common/errors.ts";
 import type { CreateProductInput } from "@freebies/db/types";
 import { noTryAsync } from "no-try";
-import { BrowserContext } from "patchright";
+import type { BrowserContext } from "patchright";
 
 type AlbumsSaleUrl = "https://itch.io/soundtracks/on-sale";
 type AssetsSaleUrl = "https://itch.io/game-assets/on-sale";

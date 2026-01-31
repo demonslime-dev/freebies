@@ -1,7 +1,7 @@
 import { createBrowserContext } from "@/common/browser.ts";
 import type { StorageState } from "@freebies/db/types";
-import { authenticator } from "otplib";
-import { BrowserContext, Page } from "patchright";
+import { generate } from "otplib";
+import type { BrowserContext, Page } from "patchright";
 
 export async function loginToItchDotIo(
   email: string,
@@ -21,7 +21,8 @@ export async function loginToItchDotIo(
 
     if (authSecret) {
       console.log("Filling in 2FA code");
-      await page.getByLabel("Verification code").fill(authenticator.generate(authSecret));
+      const otp = await generate({ secret: authSecret });
+      await page.getByLabel("Verification code").fill(otp);
       await page.getByRole("button", { name: "Log in", exact: true }).click();
     }
 

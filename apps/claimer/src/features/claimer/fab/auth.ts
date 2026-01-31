@@ -1,7 +1,7 @@
 import { createBrowserContext } from "@/common/browser.ts";
 import type { StorageState } from "@freebies/db/types";
-import { authenticator } from "otplib";
-import { BrowserContext, Page } from "patchright";
+import { generate } from "otplib";
+import type { BrowserContext, Page } from "patchright";
 
 export async function loginToFab(email: string, password: string, authSecret: string | null): Promise<StorageState> {
   const context = await createBrowserContext();
@@ -20,7 +20,7 @@ export async function loginToFab(email: string, password: string, authSecret: st
 
     if (authSecret) {
       console.log("Filling in 2FA code");
-      const otp = authenticator.generate(authSecret);
+      const otp = await generate({ secret: authSecret });
 
       for (let i = 0; i < otp.length; i++) {
         await page.fill(`input[name="code-input-${i}"]`, otp[i]);

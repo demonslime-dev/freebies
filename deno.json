@@ -1,6 +1,14 @@
 {
   "nodeModulesDir": "auto",
   "workspace": ["packages/*", "apps/claimer", "apps/server"],
+  "tasks": {
+    "scrape": "deno task --filter @freebies/claimer scrape",
+    "claim": "deno task --filter @freebies/claimer claim",
+    "experiment": "deno task --filter @freebies/claimer experiment",
+    "db:push": "deno task --filter @freebies/db db:push",
+    "db:studio": "deno task --filter @freebies/db db:studio",
+    "db:seed": "deno task --filter @freebies/db db:seed"
+  },
   "imports": {
     "drizzle-kit": "npm:drizzle-kit@beta",
     "drizzle-orm": "npm:drizzle-orm@beta",

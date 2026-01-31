@@ -1,6 +1,6 @@
 import { AlreadyClaimedError, UnauthorizedError } from "@/common/errors.ts";
 import { checkIsLoggedInToFabUsingPage } from "@/fab/auth.ts";
-import { BrowserContext } from "patchright";
+import type { BrowserContext } from "patchright";
 
 export async function claimFromFab(url: string, context: BrowserContext) {
   const page = await context.newPage();

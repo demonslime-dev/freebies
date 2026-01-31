@@ -1,7 +1,7 @@
 import { createBrowserContext } from "@/common/browser.ts";
 import type { StorageState } from "@freebies/db/types";
-import { authenticator } from "otplib";
-import { BrowserContext, Page } from "patchright";
+import { generate } from "otplib";
+import type { BrowserContext, Page } from "patchright";
 
 export async function loginToUnityAssetStore(
   email: string,
@@ -24,7 +24,7 @@ export async function loginToUnityAssetStore(
     if (pageTitle.includes("Verify your code")) {
       if (authSecret) {
         console.log("Entering 2FA code");
-        const otp = authenticator.generate(authSecret);
+        const otp = await generate({ secret: authSecret });
         await page.fill("input.verify_code", otp);
         await page.click("input[type=submit]");
       } else throw new Error("OTP required");
