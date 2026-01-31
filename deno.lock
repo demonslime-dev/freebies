@@ -9,7 +9,7 @@
     "npm:drizzle-kit@beta": "1.0.0-beta.12-a5629fb",
     "npm:drizzle-orm@beta": "1.0.0-beta.12-a5629fb_@types+mssql@9.1.9_@types+pg@8.16.0_mssql@11.0.1_pg@8.18.0",
     "npm:hono@^4.11.7": "4.11.7",
-    "npm:no-try@4": "4.0.0",
+    "npm:neverthrow@^8.2.0": "8.2.0",
     "npm:nodemailer@^7.0.13": "7.0.13",
     "npm:otplib@^13.2.1": "13.2.1",
     "npm:patchright@^1.57.0": "1.57.0",
@@ -499,6 +499,11 @@
         "@otplib/core"
       ]
     },
+    "@rollup/rollup-linux-x64-gnu@4.55.1": {
+      "integrity": "sha512-a8G4wiQxQG2BAvo+gU6XrReRRqj+pLS2NGXKm8io19goR+K8lw269eTrPkSdDTALwMmJp4th2Uh0D8J9bEV1vg==",
+      "os": ["linux"],
+      "cpu": ["x64"]
+    },
     "@scure/base@2.0.0": {
       "integrity": "sha512-3E1kpuZginKkek01ovG8krQ0Z44E3DHPjc5S2rjJw9lZn3KSQOs8S7wqikF/AH7iRanHypj85uGyxk0XAyC37w=="
     },
@@ -847,8 +852,11 @@
     "native-duplexpair@1.0.0": {
       "integrity": "sha512-E7QQoM+3jvNtlmyfqRZ0/U75VFgCls+fSkbml2MpgWkWyz3ox8Y58gNhfuziuQYGNNQAbFZJQck55LHCnCK6CA=="
     },
-    "no-try@4.0.0": {
-      "integrity": "sha512-M8zkUDrlKRXhEoDRDWt/5sJEXg4xRGL8rXvHDCXLH3J8QnfJsFjztYmAyJhLEMSMNsZkewXIxn9JO+pd73R5zg=="
+    "neverthrow@8.2.0": {
+      "integrity": "sha512-kOCT/1MCPAxY5iUV3wytNFUMUolzuwd/VF/1KCx7kf6CutrOsTie+84zTGTpgQycjvfLdBBdvBvFLqFD2c0wkQ==",
+      "optionalDependencies": [
+        "@rollup/rollup-linux-x64-gnu"
+      ]
     },
     "nodemailer@7.0.13": {
       "integrity": "sha512-PNDFSJdP+KFgdsG3ZzMXCgquO7I6McjY2vlqILjtJd0hy8wEvtugS9xKRF2NWlPNGxvLCXlTNIae4serI7dinw=="
@@ -1062,24 +1070,29 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@std/dotenv@~0.225.6",
       "npm:drizzle-kit@beta",
       "npm:drizzle-orm@beta",
+      "npm:neverthrow@^8.2.0",
+      "npm:patchright@^1.57.0",
       "npm:prettier-plugin-organize-imports@^4.3.0",
-      "npm:prettier@^3.8.1"
+      "npm:prettier@^3.8.1",
+      "npm:zod@^4.3.6"
     ],
     "members": {
       "apps/claimer": {
         "dependencies": [
           "jsr:@std/dotenv@~0.225.6",
           "npm:@types/nodemailer@^7.0.9",
-          "npm:dayjs@^1.11.19",
-          "npm:no-try@4",
           "npm:nodemailer@^7.0.13",
           "npm:otplib@^13.2.1",
-          "npm:patchright@^1.57.0",
           "npm:pg@^8.18.0",
-          "npm:prettier@^3.8.1",
           "npm:zod@^4.3.6"
+        ]
+      },
+      "apps/scraper": {
+        "dependencies": [
+          "npm:dayjs@^1.11.19"
         ]
       },
       "apps/server": {
@@ -1090,9 +1103,13 @@
       },
       "packages/db": {
         "dependencies": [
-          "jsr:@std/dotenv@~0.225.6",
           "npm:@types/pg@^8.16.0",
           "npm:pg@^8.18.0"
+        ]
+      },
+      "packages/utils": {
+        "dependencies": [
+          "npm:nodemailer@^7.0.13"
         ]
       }
     }

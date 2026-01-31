@@ -2,8 +2,8 @@ import "@std/dotenv/load";
 import { z } from "zod";
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().url(),
-  MAIL_AUTH_USER: z.string().email(),
+  DATABASE_URL: z.url(),
+  MAIL_AUTH_USER: z.email(),
   MAIL_AUTH_PASS: z.string(),
 });
 

@@ -1,7 +1,6 @@
-import { createBrowserContext } from "@/common/browser.ts";
-import { ProductPropertyNotFoundError } from "@/common/errors.ts";
 import type { CreateProductInput } from "@freebies/db/types";
-import { noTryAsync } from "no-try";
+import { createBrowserContext, ProductPropertyNotFoundError } from "@freebies/utils";
+import { fromPromise } from "neverthrow";
 import type { BrowserContext } from "patchright";
 
 type AlbumsSaleUrl = "https://itch.io/soundtracks/on-sale";
@@ -49,7 +48,7 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<CreatePr
 
     while (await gridLoader.isVisible()) {
       console.log("Load more products");
-      await noTryAsync(() => gridLoader.scrollIntoViewIfNeeded(), console.error);
+      await fromPromise(gridLoader.scrollIntoViewIfNeeded(), console.error);
       await loadingSpinner.waitFor({ state: "hidden" });
       console.log(`${await productsLocator.count()}/${totalProducts} products loaded`);
     }
@@ -61,28 +60,24 @@ async function getFreeProducts(productSaleUrl: ProductSaleUrl): Promise<CreatePr
     for (const [i, freeAssetLocator] of freeAssetLocators.entries()) {
       console.log(`${i + 1}/${freeAssetLocators.length} Getting free product URL`);
       const productUrlLocator = freeAssetLocator.locator(".title.game_link");
-      const [error, productUrl] = await noTryAsync(() => productUrlLocator.getAttribute("href"));
 
-      if (!productUrl) {
-        console.error(error, "Unable to retrieve product URL");
+      const result = await fromPromise(productUrlLocator.getAttribute("href"), console.error);
+      if (result.isErr() || result.value === null) {
+        console.error("Unable to retrieve product URL");
         continue;
-      }
-
-      productUrls.push(productUrl);
+      } else productUrls.push(result.value);
     }
 
     await page.close();
     const products: CreateProductInput[] = [];
     for (const [i, productUrl] of productUrls.entries()) {
       console.log(`${i + 1}/${productUrls.length} Getting product details for ${productUrl}`);
-      const [error, product] = await noTryAsync(() => getProduct(context, productUrl));
 
-      if (!product) {
-        console.error(error, "Unable to retrieve product details");
+      const result = await fromPromise(getProduct(context, productUrl), console.error);
+      if (result.isErr() || result.value === null) {
+        console.error("Unable to retrieve product details");
         continue;
-      }
-
-      products.push(product);
+      } else products.push(result.value);
     }
 
     console.log(`${products.length} free products retrieved`);
@@ -105,14 +100,11 @@ async function getProduct(context: BrowserContext, url: string): Promise<CreateP
 
     const images: string[] = [];
     for (const imageLocator of imageLocators) {
-      const [error, imageUrl] = await noTryAsync(() => imageLocator.getAttribute("href"));
-
-      if (!imageUrl) {
-        console.error(error, "Unable to retrieve product image");
+      const result = await fromPromise(imageLocator.getAttribute("href"), console.error);
+      if (result.isErr() || result.value === null) {
+        console.error("Unable to retrieve product image");
         continue;
-      }
-
-      images.push(imageUrl);
+      } else images.push(result.value);
     }
 
     const getDateString = async () => {
@@ -120,14 +112,14 @@ async function getProduct(context: BrowserContext, url: string): Promise<CreateP
       return await page.locator(".date_format.end_date").getAttribute("title");
     };
 
-    const [error, date] = await noTryAsync(() => getDateString());
-    if (!date) throw new ProductPropertyNotFoundError("saleEndDate", { cause: error });
+    const result = await fromPromise(getDateString(), console.error);
+    if (result.isErr() || result.value === null) throw new ProductPropertyNotFoundError("saleEndDate");
 
     return {
       url,
       title,
       images,
-      saleEndDate: new Date(date.split(" ")[0]),
+      saleEndDate: new Date(result.value.split(" ")[0]),
       productType: "Itch",
     };
   } finally {

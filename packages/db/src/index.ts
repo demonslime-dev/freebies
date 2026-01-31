@@ -9,3 +9,7 @@ if (!DATABASE_URL) {
 }
 
 export const db = drizzle(DATABASE_URL, { relations });
+
+export * from "./relations.ts";
+export * from "./schema.ts";
+export * from "./utils.ts";

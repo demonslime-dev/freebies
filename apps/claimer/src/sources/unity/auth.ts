@@ -1,5 +1,5 @@
-import { createBrowserContext } from "@/common/browser.ts";
 import type { StorageState } from "@freebies/db/types";
+import { createBrowserContext } from "@freebies/utils";
 import { generate } from "otplib";
 import type { BrowserContext, Page } from "patchright";
 

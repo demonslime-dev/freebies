@@ -1,7 +1,7 @@
-import { saveProduct } from "@/common/utils.ts";
-import { getFreeAssetsFromFab } from "./fab.ts";
-import { getFreeAssetsFromItchDotIo } from "./itch.ts";
-import { getFreeAssetsFromUnityAssetStore } from "./unity.ts";
+import { saveProduct } from "@freebies/db";
+import { getFreeAssetsFromFab } from "./sources/fab.ts";
+import { getFreeAssetsFromItchDotIo } from "./sources/itch.ts";
+import { getFreeAssetsFromUnityAssetStore } from "./sources/unity.ts";
 
 const fabProducts = await getFreeAssetsFromFab();
 const unityProducts = await getFreeAssetsFromUnityAssetStore();

@@ -1,18 +1,21 @@
 {
   "nodeModulesDir": "auto",
-  "workspace": ["packages/*", "apps/claimer", "apps/server"],
+  "workspace": ["packages/*", "apps/*"],
   "tasks": {
-    "scrape": "deno task --filter @freebies/claimer scrape",
-    "claim": "deno task --filter @freebies/claimer claim",
-    "experiment": "deno task --filter @freebies/claimer experiment",
+    "scraper:scrape": "deno task --filter @freebies/scraper scrape",
+    "claimer:claim": "deno task --filter @freebies/claimer claim",
     "db:push": "deno task --filter @freebies/db db:push",
     "db:studio": "deno task --filter @freebies/db db:studio",
     "db:seed": "deno task --filter @freebies/db db:seed"
   },
   "imports": {
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.6",
     "drizzle-kit": "npm:drizzle-kit@beta",
     "drizzle-orm": "npm:drizzle-orm@beta",
+    "neverthrow": "npm:neverthrow@^8.2.0",
+    "patchright": "npm:patchright@^1.57.0",
     "prettier": "npm:prettier@^3.8.1",
-    "prettier-plugin-organize-imports": "npm:prettier-plugin-organize-imports@^4.3.0"
+    "prettier-plugin-organize-imports": "npm:prettier-plugin-organize-imports@^4.3.0",
+    "zod": "npm:zod@^4.3.6"
   }
 }

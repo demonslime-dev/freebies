@@ -1,17 +1,8 @@
-import { createBrowserContext } from "@/common/browser.ts";
-import { AlreadyClaimedError } from "@/common/errors.ts";
-import { notifyFailure, notifySuccess } from "@/common/notifier.ts";
-import {
-  addToClaimedProducts,
-  authenticateAndSaveStorageState,
-  getAuthChecker,
-  getClaimer,
-  getProductsToClaim,
-  getUnclaimedProducts,
-} from "@/common/utils.ts";
-import { db } from "@freebies/db";
+import { addToClaimedProducts, db, getProductsToClaim, getUnclaimedProducts } from "@freebies/db";
 import type { Product } from "@freebies/db/types";
-import { noTryAsync } from "no-try";
+import { AlreadyClaimedError, createBrowserContext, notifyFailure, notifySuccess } from "@freebies/utils";
+import { fromPromise } from "neverthrow";
+import { authenticateAndSaveStorageState, getAuthChecker, getClaimer } from "./utils.ts";
 
 const productsToClaim = await getProductsToClaim();
 const groupedProducts = Map.groupBy(productsToClaim, (product) => product.productType);
@@ -36,13 +27,15 @@ for (const { id: userId, email, password, authStates, claimedProducts } of users
     const checkAuthState = () => getAuthChecker(productType)(context);
 
     console.log(`Checking authentication state for ${productType} as ${email}`);
-    const [_, isAuthenticated] = await noTryAsync(checkAuthState, console.error);
+    const result = await fromPromise(checkAuthState(), console.error);
+    const isAuthenticated = result.isOk() && result.value;
+
     if (!isAuthenticated) {
       context.browser()?.close();
 
       console.log(`${email} is not logged in to ${productType}`);
-      const [_, storageState] = await noTryAsync(authenticate, console.error);
-      if (!storageState) continue;
+      const result = await fromPromise(authenticate(), console.error);
+      if (result.isErr() || !result.value) continue;
 
       context = await createBrowserContext(storageState);
     }
@@ -57,14 +50,14 @@ for (const { id: userId, email, password, authStates, claimedProducts } of users
         continue;
       }
 
-      const [error] = await noTryAsync(() => claim(product.url, context), console.error);
+      const result = await fromPromise(claim(product.url, context), (error) => error);
 
-      if (!error) {
-        await noTryAsync(() => addToClaimedProducts(userId, product.id), console.error);
+      if (result.isOk()) {
+        await fromPromise(addToClaimedProducts(userId, product.id), console.log);
         successfullyClaimedProducts.push(product);
       } else {
-        if (error instanceof AlreadyClaimedError) {
-          await noTryAsync(() => addToClaimedProducts(userId, product.id), console.error);
+        if (result.error instanceof AlreadyClaimedError) {
+          await fromPromise(addToClaimedProducts(userId, product.id), console.log);
           continue;
         }
 
@@ -73,7 +66,7 @@ for (const { id: userId, email, password, authStates, claimedProducts } of users
     }
 
     await context.browser()?.close();
-    await noTryAsync(() => notifyFailure(email, productType, failedToClaimProducts), console.error);
-    await noTryAsync(() => notifySuccess(email, productType, successfullyClaimedProducts), console.error);
+    await fromPromise(notifyFailure(email, productType, failedToClaimProducts), console.error);
+    await fromPromise(notifySuccess(email, productType, successfullyClaimedProducts), console.error);
   }
 }

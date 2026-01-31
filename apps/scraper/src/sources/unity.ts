@@ -1,6 +1,5 @@
-import { createBrowserContext } from "@/common/browser.ts";
-import { ProductPropertyNotFoundError } from "@/common/errors.ts";
 import type { CreateProductInput } from "@freebies/db/types";
+import { createBrowserContext, ProductPropertyNotFoundError } from "@freebies/utils";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import timezone from "dayjs/plugin/timezone.js";

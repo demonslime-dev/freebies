@@ -1,6 +1,6 @@
-import { AlreadyClaimedError, UnauthorizedError } from "@/common/errors.ts";
-import { checkIsLoggedInToItchDotIoUsingPage } from "@/itch/auth.ts";
+import { AlreadyClaimedError, UnauthorizedError } from "@freebies/utils";
 import type { BrowserContext, Page } from "patchright";
+import { checkIsLoggedInToItchDotIoUsingPage } from "./auth.ts";
 
 export async function claimFromItchDotIo(url: string, context: BrowserContext) {
   const page = await context.newPage();

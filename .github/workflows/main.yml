@@ -40,7 +40,7 @@ jobs:
         run: npx patchright install chrome --with-deps
 
       - name: Start scraper
-        run: deno task scrape
+        run: deno task scraper:scrape
 
   claim:
     name: Claim
@@ -72,4 +72,4 @@ jobs:
         run: npx patchright install chrome --with-deps
 
       - name: Start claimer
-        run: deno task claim
+        run: deno task claimer:claim
