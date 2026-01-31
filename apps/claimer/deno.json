@@ -11,15 +11,15 @@
     "@/fab/": "./src/features/claimer/fab/",
     "@/unity/": "./src/features/claimer/unity/",
     "@/itch/": "./src/features/claimer/itch/",
-    "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
-    "@types/nodemailer": "npm:@types/nodemailer@^6.4.17",
-    "dayjs": "npm:dayjs@^1.11.13",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.6",
+    "@types/nodemailer": "npm:@types/nodemailer@^7.0.9",
+    "dayjs": "npm:dayjs@^1.11.19",
     "no-try": "npm:no-try@^4.0.0",
-    "nodemailer": "npm:nodemailer@^7.0.4",
-    "otplib": "npm:otplib@^12.0.1",
-    "patchright": "npm:patchright@^1.56.1",
-    "pg": "npm:pg@^8.16.3",
-    "prettier": "npm:prettier@^3.6.2",
-    "zod": "npm:zod@^3.25.73"
+    "nodemailer": "npm:nodemailer@^7.0.13",
+    "otplib": "npm:otplib@^13.2.1",
+    "patchright": "npm:patchright@^1.57.0",
+    "pg": "npm:pg@^8.18.0",
+    "prettier": "npm:prettier@^3.8.1",
+    "zod": "npm:zod@^4.3.6"
   }
 }
