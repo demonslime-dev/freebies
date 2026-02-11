@@ -1,5 +1,4 @@
-import { db } from "@freebies/db";
-import { authState, coupon, user } from "@freebies/db/schema";
+import { authState, coupon, db, user } from "@freebies/db";
 import type { ProductType, User } from "@freebies/db/types";
 import { eq } from "drizzle-orm";
 

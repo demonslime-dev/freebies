@@ -1,25 +1,19 @@
 import type { CreateProductInput } from "@freebies/db/types";
 import { createBrowserContext } from "@freebies/utils";
-import dayjs from "dayjs";
-import customParseFormat from "dayjs/plugin/customParseFormat.js";
-import timezone from "dayjs/plugin/timezone.js";
-import utc from "dayjs/plugin/utc.js";
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.extend(customParseFormat);
 
 export async function getFreeAssetsFromFab(): Promise<CreateProductInput[]> {
+  const apiResponse = "https://www.fab.com/i/listings/prices-infos?*";
   const assetsUrl = "https://www.fab.com/limited-time-free";
   const context = await createBrowserContext();
 
   try {
     console.log(`Getting free products from ${assetsUrl}`);
     const page = await context.newPage();
+    const response = page.waitForResponse(apiResponse);
     await page.goto(assetsUrl);
-
-    const text = await page.getByText(/Limited-Time\sFree\s\(Until.+\)/).innerText();
-    const saleEndDate = await getSaleEndDate(text);
+    const res = await response;
+    const json = await res.json();
+    const saleEndDate = json.offers[0].discountEndDate;
 
     const titleLocators = await page.locator("a.fabkit-Typography-root > div").all();
     const thumbnailLocators = await page.locator(".fabkit-Thumbnail-root > img").all();
@@ -60,11 +54,4 @@ export async function getFreeAssetsFromFab(): Promise<CreateProductInput[]> {
   } finally {
     await context.browser()?.close();
   }
-}
-
-function getSaleEndDate(text: string) {
-  const match = text.match(/\(Until\s(.+)\sET\)/);
-  if (!match) throw new Error("Unable to match sale end date");
-  const date = dayjs.tz(match[1], "MMMM D [at] h:mm A [ET]", "America/New_York");
-  return date.utc().toISOString();
 }
