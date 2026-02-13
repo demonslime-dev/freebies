@@ -22,7 +22,7 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<CreateProductI
     const saleEndDate = getSaleEndDate(text);
 
     const getYourGiftLocator = page.getByRole("link", {
-      name: "Get your gift",
+      name: "Get your free gift",
     });
     const saleContainerLocator = getYourGiftLocator.locator("../..");
 
