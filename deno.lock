@@ -3,11 +3,11 @@
   "specifiers": {
     "jsr:@std/dotenv@~0.225.6": "0.225.6",
     "npm:@hono/node-server@^1.19.9": "1.19.9_hono@4.11.9",
+    "npm:@neondatabase/serverless@^1.0.2": "1.0.2",
     "npm:@types/nodemailer@^7.0.9": "7.0.9",
-    "npm:@types/pg@^8.16.0": "8.16.0",
     "npm:dayjs@^1.11.19": "1.11.19",
     "npm:drizzle-kit@beta": "1.0.0-beta.15-859cf75",
-    "npm:drizzle-orm@beta": "1.0.0-beta.15-859cf75_@types+mssql@9.1.9_@types+pg@8.16.0_mssql@11.0.1_pg@8.18.0_zod@4.3.6",
+    "npm:drizzle-orm@beta": "1.0.0-beta.15-859cf75_@neondatabase+serverless@1.0.2_@types+mssql@9.1.9_mssql@11.0.1_pg@8.18.0_zod@4.3.6",
     "npm:hono@^4.11.7": "4.11.9",
     "npm:neverthrow@^8.2.0": "8.2.0",
     "npm:nodemailer@^7.0.13": "7.0.13",
@@ -328,6 +328,13 @@
         "jsbi"
       ]
     },
+    "@neondatabase/serverless@1.0.2": {
+      "integrity": "sha512-I5sbpSIAHiB+b6UttofhrN/UJXII+4tZPAq1qugzwCwLIL8EZLV7F/JyHUrEIiGgQpEXzpnjlJ+zwcEhheGvCw==",
+      "dependencies": [
+        "@types/node",
+        "@types/pg"
+      ]
+    },
     "@noble/hashes@2.0.1": {
       "integrity": "sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw=="
     },
@@ -388,8 +395,8 @@
         "tedious"
       ]
     },
-    "@types/node@25.2.3": {
-      "integrity": "sha512-m0jEgYlYz+mDJZ2+F4v8D1AyQb+QzsNqRuI7xg1VQX/KlKS0qT9r1Mo16yo5F/MtifXFgaofIFsdFMox2SxIbQ==",
+    "@types/node@22.19.11": {
+      "integrity": "sha512-BH7YwL6rA93ReqeQS1c4bsPpcfOmJasG+Fkr6Y59q83f9M1WcBRHR2vM+P9eOisYRcN3ujQoiZY8uk5W+1WL8w==",
       "dependencies": [
         "undici-types"
       ]
@@ -494,17 +501,17 @@
       ],
       "bin": true
     },
-    "drizzle-orm@1.0.0-beta.15-859cf75_@types+mssql@9.1.9_@types+pg@8.16.0_mssql@11.0.1_pg@8.18.0_zod@4.3.6": {
+    "drizzle-orm@1.0.0-beta.15-859cf75_@neondatabase+serverless@1.0.2_@types+mssql@9.1.9_mssql@11.0.1_pg@8.18.0_zod@4.3.6": {
       "integrity": "sha512-dGVb2Q70H2AV6513hkOXR3Ud0FeGXLdugVq3YehoqkGIVTJrkuo0gRnCcW/dfI00O07t3T4HSh4clF/D/o/IsQ==",
       "dependencies": [
+        "@neondatabase/serverless",
         "@types/mssql",
-        "@types/pg",
         "mssql",
         "pg",
         "zod"
       ],
       "optionalPeers": [
-        "@types/pg",
+        "@neondatabase/serverless",
         "pg",
         "zod"
       ]
@@ -866,8 +873,8 @@
       "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
       "bin": true
     },
-    "undici-types@7.16.0": {
-      "integrity": "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="
+    "undici-types@6.21.0": {
+      "integrity": "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="
     },
     "uuid@8.3.2": {
       "integrity": "sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==",
@@ -921,8 +928,7 @@
       },
       "packages/db": {
         "dependencies": [
-          "npm:@types/pg@^8.16.0",
-          "npm:pg@^8.18.0"
+          "npm:@neondatabase/serverless@^1.0.2"
         ]
       },
       "packages/utils": {

@@ -1,5 +1,5 @@
 import "@std/dotenv/load";
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle } from "drizzle-orm/neon-http";
 import { relations } from "./relations.ts";
 
 const DATABASE_URL = Deno.env.get("DATABASE_URL");

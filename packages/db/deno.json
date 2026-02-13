@@ -10,7 +10,6 @@
     "db:seed": "deno run -A ./src/private/createUsers.ts"
   },
   "imports": {
-    "@types/pg": "npm:@types/pg@^8.16.0",
-    "pg": "npm:pg@^8.18.0"
+    "@neondatabase/serverless": "npm:@neondatabase/serverless@^1.0.2"
   }
 }
