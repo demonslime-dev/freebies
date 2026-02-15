@@ -8,7 +8,7 @@ export async function loginToFab(email: string, password: string, authSecret: st
   try {
     const page = await context.newPage();
     console.log("Navigating to login page");
-    await page.goto("https://www.unrealengine.com/id/login?lang=en_US");
+    await page.goto("https://www.epicgames.com/id/login");
     console.log("Filling login credentials");
     await page.fill("#email", email);
 
@@ -39,7 +39,9 @@ export async function loginToFab(email: string, password: string, authSecret: st
 
 export async function checkIsLoggedInToFabUsingPage(page: Page) {
   try {
-    return await page.locator('unrealengine-navigation[isloggedin="true"]').isVisible();
+    const isNotLoggedIn = await page.getByLabel("Sign in").first().isVisible();
+    await page.waitForTimeout(5 * 60 * 1000);
+    return !isNotLoggedIn;
   } catch (error) {
     console.error(error);
     return false;
@@ -50,7 +52,7 @@ export async function isLoggedInToFab(context: BrowserContext) {
   const page = await context.newPage();
 
   try {
-    await page.goto("https://www.unrealengine.com/en-US", {
+    await page.goto("https://www.fab.com", {
       waitUntil: "networkidle",
     });
     return await checkIsLoggedInToFabUsingPage(page);

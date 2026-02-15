@@ -9,6 +9,7 @@ export async function getFreeAssetsFromFab(): Promise<CreateProductInput[]> {
   try {
     console.log(`Getting free products from ${assetsUrl}`);
     const page = await context.newPage();
+    // FIXME: Response timeout on github actions but not locally
     const response = page.waitForResponse(apiResponse);
     await page.goto(assetsUrl);
     const res = await response;
