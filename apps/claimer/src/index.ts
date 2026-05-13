@@ -1,12 +1,20 @@
-import { addToClaimedProducts, db, getProductsToClaim, getUnclaimedProducts } from "@freebies/db";
-import type { Product } from "@freebies/db/types";
+import { addToClaimedProducts, db, getProductsToClaim, getUnclaimedProducts, saveStorageState } from "@freebies/db";
+import type { Product, ProductType } from "@freebies/db/types";
 import { AlreadyClaimedError, createBrowserContext, notifyFailure, notifySuccess } from "@freebies/utils";
+import { expandGlob } from "@std/fs";
 import { fromPromise } from "neverthrow";
-import { authenticateAndSaveStorageState, getAuthChecker, getClaimer } from "./utils.ts";
+import type { Claimer } from "./types.ts";
 
 const productsToClaim = await getProductsToClaim();
 const groupedProducts = Map.groupBy(productsToClaim, (product) => product.productType);
 const users = await db.query.user.findMany({ with: { authStates: true, claimedProducts: true } });
+
+const claimers = new Map<ProductType, Claimer>();
+for await (const file of expandGlob("./sources/*.ts", { root: import.meta.dirname })) {
+  const module = await import(file.path);
+  const claimer: Claimer = module.default;
+  claimers.set(claimer.productType, claimer);
+}
 
 for (const { id: userId, email, password, authStates, claimedProducts } of users) {
   for (const { productType, storageState, authSecret } of authStates) {
@@ -14,31 +22,17 @@ for (const { id: userId, email, password, authStates, claimedProducts } of users
 
     const products = groupedProducts.get(productType) ?? [];
     const unclaimedProducts = getUnclaimedProducts(products, claimedProducts);
-    const claim = getClaimer(productType);
 
     if (unclaimedProducts.length === 0) {
       console.log("No products to claim");
       continue;
     }
 
-    let context = await createBrowserContext(storageState);
-
-    const authenticate = () => authenticateAndSaveStorageState(email, password, authSecret, productType);
-    const checkAuthState = () => getAuthChecker(productType)(context);
-
-    console.log(`Checking authentication state for ${productType} as ${email}`);
-    const result = await fromPromise(checkAuthState(), console.error);
-    const isAuthenticated = result.isOk() && result.value;
-
-    if (!isAuthenticated) {
-      context.browser()?.close();
-
-      console.log(`${email} is not logged in to ${productType}`);
-      const result = await fromPromise(authenticate(), console.error);
-      if (result.isErr() || !result.value) continue;
-
-      context = await createBrowserContext(storageState);
-    }
+    const context = await createBrowserContext(storageState);
+    const claimer = claimers.get(productType);
+    if (!claimer) throw Error(`Couldn't get the claimer for ${productType}`);
+    await claimer.authenticate({ email, password, authSecret }, context);
+    await saveStorageState(userId, productType, await context.storageState());
 
     const successfullyClaimedProducts: Product[] = [];
     const failedToClaimProducts: Product[] = [];
@@ -50,7 +44,7 @@ for (const { id: userId, email, password, authStates, claimedProducts } of users
         continue;
       }
 
-      const result = await fromPromise(claim(product.url, context), (error) => error);
+      const result = await fromPromise(claimer.claim(product.url, context), (error) => error);
 
       if (result.isOk()) {
         await fromPromise(addToClaimedProducts(userId, product.id), console.log);
