@@ -1,6 +1,6 @@
 import type { StorageState } from "@freebies/db/types";
 import { createBrowserContext } from "@freebies/utils";
-import { generate } from "otplib";
+import { createGuardrails, generate } from "otplib";
 import type { BrowserContext, Page } from "patchright";
 
 export async function loginToItchDotIo(
@@ -21,7 +21,8 @@ export async function loginToItchDotIo(
 
     if (authSecret) {
       console.log("Filling in 2FA code");
-      const otp = await generate({ secret: authSecret });
+      const guardrails = createGuardrails({ MIN_SECRET_BYTES: 10 });
+      const otp = await generate({ secret: authSecret, guardrails });
       await page.getByLabel("Verification code").fill(otp);
       await page.getByRole("button", { name: "Log in", exact: true }).click();
     }

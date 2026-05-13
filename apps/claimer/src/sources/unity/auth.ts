@@ -1,6 +1,6 @@
 import type { StorageState } from "@freebies/db/types";
 import { createBrowserContext } from "@freebies/utils";
-import { generate } from "otplib";
+import { createGuardrails, generate } from "otplib";
 import type { BrowserContext, Page } from "patchright";
 
 export async function loginToUnityAssetStore(
@@ -24,7 +24,8 @@ export async function loginToUnityAssetStore(
     if (pageTitle.includes("Verify your code")) {
       if (authSecret) {
         console.log("Entering 2FA code");
-        const otp = await generate({ secret: authSecret });
+        const guardrails = createGuardrails({ MIN_SECRET_BYTES: 10 });
+        const otp = await generate({ secret: authSecret, guardrails });
         await page.fill("input.verify_code", otp);
         await page.click("input[type=submit]");
       } else throw new Error("OTP required");

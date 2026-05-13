@@ -1,6 +1,6 @@
 import type { StorageState } from "@freebies/db/types";
 import { createBrowserContext } from "@freebies/utils";
-import { generate } from "otplib";
+import { createGuardrails, generate } from "otplib";
 import type { BrowserContext, Page } from "patchright";
 
 export async function loginToFab(email: string, password: string, authSecret: string | null): Promise<StorageState> {
@@ -20,7 +20,8 @@ export async function loginToFab(email: string, password: string, authSecret: st
 
     if (authSecret) {
       console.log("Filling in 2FA code");
-      const otp = await generate({ secret: authSecret });
+      const guardrails = createGuardrails({ MIN_SECRET_BYTES: 10 });
+      const otp = await generate({ secret: authSecret, guardrails });
 
       for (let i = 0; i < otp.length; i++) {
         await page.fill(`input[name="code-input-${i}"]`, otp[i]);
