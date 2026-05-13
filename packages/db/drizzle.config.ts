@@ -1,16 +1,11 @@
 import { defineConfig } from "drizzle-kit";
-
-const DATABASE_URL = Deno.env.get("DATABASE_URL");
-
-if (!DATABASE_URL) {
-  throw new Error("Missing DATABASE_URL environment variable");
-}
+import { env } from "./src/env.ts";
 
 export default defineConfig({
   out: "./drizzle",
   schema: "./src/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
-    url: DATABASE_URL,
+    url: env.DATABASE_URL,
   },
 });

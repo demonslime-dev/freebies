@@ -2,14 +2,9 @@
   "name": "@freebies/claimer",
   "exports": "./src/index.ts",
   "tasks": {
-    "claim": "deno run -A ./src/index.ts"
+    "claim": "deno run --env-file -A ./src/index.ts"
   },
   "imports": {
-    "@std/dotenv": "jsr:@std/dotenv@^0.225.6",
-    "@types/nodemailer": "npm:@types/nodemailer@^7.0.9",
-    "nodemailer": "npm:nodemailer@^7.0.13",
-    "otplib": "npm:otplib@^13.2.1",
-    "pg": "npm:pg@^8.18.0",
-    "zod": "npm:zod@^4.3.6"
+    "otplib": "npm:otplib@^13.2.1"
   }
 }

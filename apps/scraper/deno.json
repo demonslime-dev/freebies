@@ -2,7 +2,7 @@
   "name": "@freebies/scraper",
   "exports": "./src/index.ts",
   "tasks": {
-    "scrape": "deno run -A ./src/index.ts"
+    "scrape": "deno run --env-file -A ./src/index.ts"
   },
   "imports": {
     "dayjs": "npm:dayjs@^1.11.19"

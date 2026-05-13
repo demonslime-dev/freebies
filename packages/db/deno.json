@@ -5,11 +5,13 @@
     "./types": "./src/types.ts"
   },
   "tasks": {
-    "db:push": "deno run -A --env-file drizzle-kit push --force",
-    "db:studio": "deno run -A --env-file drizzle-kit studio --verbose",
-    "db:seed": "deno run -A ./src/private/createUsers.ts"
+    "db:push": "deno run --env-file -A drizzle-kit push --force",
+    "db:studio": "deno run --env-file -A drizzle-kit studio --verbose",
+    "db:seed": "deno run --env-file -A ./src/private/createUsers.ts"
   },
   "imports": {
+    "drizzle-kit": "npm:drizzle-kit@beta",
+    "drizzle-orm": "npm:drizzle-orm@beta",
     "@neondatabase/serverless": "npm:@neondatabase/serverless@^1.0.2"
   }
 }

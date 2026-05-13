@@ -1,6 +1,6 @@
 import type { Product, ProductType } from "@freebies/db/types";
 import nodemailer from "nodemailer";
-import env from "./env.ts";
+import { env } from "./env.ts";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",

@@ -1,13 +1,13 @@
 import { db } from "@freebies/db";
 import type { ProductType } from "@freebies/db/types";
-// import { serve } from "@hono/node-server";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { Hono } from "hono/tiny";
+import { env } from "./env.ts";
 import type { ApiResponse, Data } from "./types.ts";
 import { createOrUpdateAuthState, createOrUpdateUser, updateCoupon } from "./utils.ts";
 
-const port = Number(Deno.env.get("PORT") ?? "8000");
+const port = env.PORT;
 const app = new Hono();
 
 app.use(logger());
@@ -97,9 +97,5 @@ app.post("/coupons/:code", async (ctx) => {
     });
   }
 });
-
-// serve({ fetch: app.fetch, port }, (info) => {
-//   console.log(`Server is running on http://localhost:${info.port}`);
-// });
 
 Deno.serve({ port }, app.fetch);

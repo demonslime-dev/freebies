@@ -1,8 +1,7 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  MAIL_AUTH_USER: z.email(),
-  MAIL_AUTH_PASS: z.string(),
+  PORT: z.number().default(8000),
 });
 
 export const env = envSchema.parse(Deno.env.toObject());
