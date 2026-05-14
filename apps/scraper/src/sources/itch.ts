@@ -2,6 +2,7 @@ import type { CreateProductInput } from "@freebies/db/types";
 import { createBrowserContext, ProductPropertyNotFoundError } from "@freebies/utils";
 import { fromPromise } from "neverthrow";
 import type { BrowserContext } from "patchright";
+import type { Scraper } from "../types.ts";
 
 type AlbumsSaleUrl = "https://itch.io/soundtracks/on-sale";
 type AssetsSaleUrl = "https://itch.io/game-assets/on-sale";
@@ -126,3 +127,8 @@ async function getProduct(context: BrowserContext, url: string): Promise<CreateP
     await page.close();
   }
 }
+
+export default {
+  productType: "Itch",
+  scrape: getFreeAssetsFromItchDotIo,
+} satisfies Scraper;

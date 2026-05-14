@@ -9,6 +9,7 @@
     "db:seed": "deno task -f @freebies/db db:seed"
   },
   "imports": {
+    "@std/fs": "jsr:@std/fs@^1.0.23",
     "neverthrow": "npm:neverthrow@^8.2.0",
     "patchright": "npm:patchright@^1.57.0",
     "prettier": "npm:prettier@^3.8.1",

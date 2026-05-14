@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import timezone from "dayjs/plugin/timezone.js";
 import utc from "dayjs/plugin/utc.js";
+import type { Scraper } from "../types.ts";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -64,3 +65,8 @@ function getSaleEndDate(text: string): string {
   const date = dayjs.tz(match[1], "MMMM D, YYYY [at] h:mma", "America/Los_Angeles");
   return date.utc().toISOString();
 }
+
+export default {
+  productType: "Unity",
+  scrape: getFreeAssetsFromUnityAssetStore,
+} satisfies Scraper;

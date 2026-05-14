@@ -371,6 +371,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@std/fs@^1.0.23",
       "npm:neverthrow@^8.2.0",
       "npm:patchright@^1.57.0",
       "npm:prettier-plugin-organize-imports@^4.3.0",
@@ -380,7 +381,6 @@
     "members": {
       "apps/claimer": {
         "dependencies": [
-          "jsr:@std/fs@^1.0.23",
           "npm:otplib@^13.4.0"
         ]
       },

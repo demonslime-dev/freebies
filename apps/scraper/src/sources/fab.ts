@@ -1,5 +1,6 @@
 import type { CreateProductInput } from "@freebies/db/types";
 import { createBrowserContext } from "@freebies/utils";
+import type { Scraper } from "../types.ts";
 
 export async function getFreeAssetsFromFab(): Promise<CreateProductInput[]> {
   const apiResponse = "https://www.fab.com/i/listings/prices-infos?*";
@@ -56,3 +57,8 @@ export async function getFreeAssetsFromFab(): Promise<CreateProductInput[]> {
     await context.browser()?.close();
   }
 }
+
+export default {
+  productType: "Fab",
+  scrape: getFreeAssetsFromFab,
+} satisfies Scraper;

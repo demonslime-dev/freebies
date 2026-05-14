@@ -5,7 +5,6 @@
     "claim": "deno run --env-file -A ./src/index.ts"
   },
   "imports": {
-    "@std/fs": "jsr:@std/fs@^1.0.23",
     "otplib": "npm:otplib@^13.4.0"
   }
 }

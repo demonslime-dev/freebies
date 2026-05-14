@@ -1,13 +1,17 @@
 import { saveProduct } from "@freebies/db";
-import { getFreeAssetsFromFab } from "./sources/fab.ts";
-import { getFreeAssetsFromItchDotIo } from "./sources/itch.ts";
-import { getFreeAssetsFromUnityAssetStore } from "./sources/unity.ts";
+import type { CreateProductInput } from "@freebies/db/types";
+import { expandGlob } from "@std/fs";
+import type { Scraper } from "./types.ts";
 
-const fabProducts = await getFreeAssetsFromFab();
-const unityProducts = await getFreeAssetsFromUnityAssetStore();
-const itchProducts = await getFreeAssetsFromItchDotIo();
-
-const products = [...fabProducts, ...unityProducts, ...itchProducts];
+let products: CreateProductInput[] = [];
+for await (const file of expandGlob("./sources/*.ts", { root: import.meta.dirname })) {
+  const module = await import(file.path);
+  const scraper: Scraper = module.default;
+  // For testing purpose
+  // if (scraper.productType !== "Unity") continue;
+  const scrapedProducts = await scraper.scrape();
+  products = [...products, ...scrapedProducts];
+}
 
 console.log("Saving products...");
 products.forEach((product, index) => {
