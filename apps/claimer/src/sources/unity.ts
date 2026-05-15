@@ -53,9 +53,21 @@ async function authenticate({ email, password, authSecret }: UserCredentials, co
   await page.close();
 }
 
-async function claim(url: string, context: BrowserContext) {
+async function claim(url: string, context: BrowserContext, authSecret?: string) {
   const page = await context.newPage();
   await page.goto(url);
+
+  page.on("request", async (request) => {
+    if (!authSecret) return;
+    const tfaUrl = "https://login.unity.com/en/sign-in/tfa";
+    if (request.isNavigationRequest() && request.url().startsWith(tfaUrl)) {
+      console.log("Two factor authentication required, generating OTP...");
+      const guardrails = createGuardrails({ MIN_SECRET_BYTES: 10 });
+      const otp = await generate({ secret: authSecret, guardrails });
+      await page.getByPlaceholder("Authentication code").fill(otp);
+      await page.getByRole("button", { name: "Continue" }).click();
+    }
+  });
 
   if (!isAuthenticated(page)) throw new UnauthorizedError();
 

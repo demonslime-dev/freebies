@@ -12,5 +12,5 @@ export interface Claimer {
   isAuthenticated(page: Page): Promise<boolean>;
   isAuthenticated(context: BrowserContext): Promise<boolean>;
   authenticate(user: UserCredentials, context: BrowserContext): Promise<void>;
-  claim(url: string, context: BrowserContext): Promise<void>;
+  claim(url: string, context: BrowserContext, authSecret?: string | null): Promise<void>;
 }

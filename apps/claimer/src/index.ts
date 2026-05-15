@@ -44,7 +44,7 @@ for (const { id: userId, email, password, authStates, claimedProducts } of users
         continue;
       }
 
-      const result = await fromPromise(claimer.claim(product.url, context), (error) => error);
+      const result = await fromPromise(claimer.claim(product.url, context, authSecret), (error) => error);
 
       if (result.isOk()) {
         await fromPromise(addToClaimedProducts(userId, product.id), console.log);
