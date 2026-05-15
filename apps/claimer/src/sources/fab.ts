@@ -3,6 +3,9 @@ import { createGuardrails, generate } from "otplib";
 import type { BrowserContext, Page } from "patchright";
 import type { Claimer, UserCredentials } from "../types.ts";
 
+const authUrl = "https://www.epicgames.com/id/login";
+const authRedirectUrl = "https://www.epicgames.com/account/personal";
+
 async function isAuthenticated(page: Page): Promise<boolean>;
 async function isAuthenticated(context: BrowserContext): Promise<boolean>;
 async function isAuthenticated(target: BrowserContext | Page): Promise<boolean> {
@@ -24,9 +27,6 @@ async function isAuthenticated(target: BrowserContext | Page): Promise<boolean> 
     .then(() => false)
     .catch(() => true);
 }
-
-const authUrl = "https://www.epicgames.com/id/login";
-const authRedirectUrl = "https://www.epicgames.com/account/personal";
 
 async function authenticate({ email, password, authSecret }: UserCredentials, context: BrowserContext) {
   if (await isAuthenticated(context)) return;

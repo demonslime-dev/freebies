@@ -3,6 +3,9 @@ import { createGuardrails, generate } from "otplib";
 import type { BrowserContext, Page } from "patchright";
 import type { Claimer, UserCredentials } from "../types.ts";
 
+const authUrl = "https://id.unity.com/en";
+const authRedirectUrl = "https://id.unity.com/en/security";
+
 async function isAuthenticated(page: Page): Promise<boolean>;
 async function isAuthenticated(context: BrowserContext): Promise<boolean>;
 async function isAuthenticated(target: BrowserContext | Page): Promise<boolean> {
@@ -24,9 +27,6 @@ async function isAuthenticated(target: BrowserContext | Page): Promise<boolean> 
     .then(() => true)
     .catch(() => false);
 }
-
-const authUrl = "https://id.unity.com/en";
-const authRedirectUrl = "https://id.unity.com/en/security";
 
 async function authenticate({ email, password, authSecret }: UserCredentials, context: BrowserContext) {
   if (await isAuthenticated(context)) return;
