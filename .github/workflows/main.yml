@@ -23,7 +23,8 @@ jobs:
         with:
           deno-version: v2.x
 
-      - name: Cache Deno dependencies
+      - name: Cache Deno and Playwright
+        id: cache-assets
         uses: actions/cache@v5
         with:
           path: |
@@ -36,8 +37,16 @@ jobs:
       - name: Install packages
         run: deno install
 
-      - name: Install patchwright browser with dependencies
+      # Only run the full install if the cache missed
+      - name: Install Patchright Browser (Cache Miss)
+        if: steps.cache-assets.outputs.cache-hit != 'true'
         run: npx patchright install chrome --with-deps
+
+      # If cache hit, we still need the OS-level system dependencies (libgbm, libnss3, etc.)
+      # These are small/fast to install and aren't part of the home directory cache.
+      - name: Install System Dependencies (Cache Hit)
+        if: steps.cache-assets.outputs.cache-hit == 'true'
+        run: npx patchright install-deps chrome
 
       - name: Start scraper
         run: deno task scraper:scrape
