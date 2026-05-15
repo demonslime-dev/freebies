@@ -30,6 +30,7 @@ jobs:
           path: |
             ~/.cache/deno
             ~/.cache/ms-playwright
+            node_modules
           key: ${{ runner.os }}-deno-${{ hashFiles('**/deno.lock') }}
           restore-keys: |
             ${{ runner.os }}-deno-
