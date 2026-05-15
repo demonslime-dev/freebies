@@ -3,6 +3,7 @@ import { createGuardrails, generate } from "otplib";
 import type { BrowserContext, Page } from "patchright";
 import type { Claimer, UserCredentials } from "../types.ts";
 
+const authCheckUrl = "https://itch.io/dashboard";
 const authUrl = "https://itch.io/login";
 const authRedirectUrl = /https:\/\/itch\.io\/(my-feed|dashboard)/;
 
@@ -12,20 +13,16 @@ async function isAuthenticated(target: BrowserContext | Page): Promise<boolean> 
   const isBrowserContext = "newPage" in target;
   const page = isBrowserContext ? await target.newPage() : target;
 
-  if (isBrowserContext) {
-    await page.goto(authUrl);
-    return await page
-      .waitForURL(authRedirectUrl)
-      .then(() => true)
-      .catch(() => false)
-      .finally(() => page.close());
-  }
+  if (isBrowserContext) await page.goto(authCheckUrl);
 
-  return await page
+  const isAuthenticated = await page
     .locator(".profile_link")
     .waitFor({ state: "visible" })
     .then(() => true)
     .catch(() => false);
+
+  if (isBrowserContext) await page.close();
+  return isAuthenticated;
 }
 
 async function authenticate({ email, password, authSecret }: UserCredentials, context: BrowserContext) {
