@@ -121,7 +121,7 @@ async function getProduct(context: BrowserContext, url: string): Promise<CreateP
       title,
       images,
       saleEndDate: new Date(result.value.split(" ")[0]),
-      productType: "Itch",
+      sourceType: "itch.io",
     };
   } finally {
     await page.close();
@@ -129,6 +129,6 @@ async function getProduct(context: BrowserContext, url: string): Promise<CreateP
 }
 
 export default {
-  productType: "Itch",
+  sourceType: "itch.io",
   scrape: getFreeAssetsFromItchDotIo,
 } satisfies Scraper;

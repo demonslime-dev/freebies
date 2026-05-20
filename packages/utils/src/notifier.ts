@@ -1,4 +1,4 @@
-import type { Product, ProductType } from "@freebies/db/types";
+import type { Product, SourceType } from "@freebies/db/types";
 import nodemailer from "nodemailer";
 import { env } from "./env.ts";
 
@@ -19,25 +19,25 @@ export const sendMail = async (to: string, subject: string, products: Product[])
     html: generateHtmlMessage(products),
   });
 
-export async function notifyUser(to: string, productType: ProductType, products: Product[], error: string) {
+export async function notifyUser(to: string, sourceType: SourceType, products: Product[], error: string) {
   if (products.length == 0) return;
 
   if (error) {
-    await sendMail(to, `Failed to claim products from ${productType}`, products);
+    await sendMail(to, `Failed to claim products from ${sourceType}`, products);
     return;
   }
 
-  await sendMail(to, `Successfully claimed products from ${productType}`, products);
+  await sendMail(to, `Successfully claimed products from ${sourceType}`, products);
 }
 
-export async function notifySuccess(to: string, productType: ProductType, products: Product[]) {
+export async function notifySuccess(to: string, sourceType: SourceType, products: Product[]) {
   if (products.length == 0) return;
-  await sendMail(to, `Successfully claimed products from ${productType}`, products);
+  await sendMail(to, `Successfully claimed products from ${sourceType}`, products);
 }
 
-export async function notifyFailure(to: string, productType: ProductType, products: Product[]) {
+export async function notifyFailure(to: string, sourceType: SourceType, products: Product[]) {
   if (products.length == 0) return;
-  await sendMail(to, `Failed to claim products from ${productType}`, products);
+  await sendMail(to, `Failed to claim products from ${sourceType}`, products);
 }
 
 const generateHtmlMessage = (products: Product[]) => `

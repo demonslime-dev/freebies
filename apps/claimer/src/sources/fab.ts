@@ -76,7 +76,7 @@ async function claim(url: string, context: BrowserContext) {
 }
 
 export default {
-  productType: "Fab",
+  sourceType: "fab.com",
   isAuthenticated,
   authenticate,
   claim,

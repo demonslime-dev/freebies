@@ -13,14 +13,31 @@ import {
 } from "drizzle-orm/pg-core";
 import type { StorageState } from "./types.ts";
 
-export const productType = pgEnum("productType", ["Fab", "Unity", "Itch"]);
-
 export const user = pgTable("user", {
   id: serial().primaryKey(),
   name: varchar().notNull(),
-  email: varchar().notNull().unique(),
-  password: varchar().notNull(),
 });
+
+export const sources = ["assetstore.unity.com", "fab.com", "itch.io"] as const;
+
+export const sourceType = pgEnum("sourceType", sources);
+
+export const productSource = pgTable(
+  "productSource",
+  {
+    id: serial().primaryKey(),
+    sourceType: sourceType().notNull(),
+    email: varchar().notNull(),
+    password: varchar().notNull(),
+    authSecret: text(),
+    data: json().default(sql`'{}'::json`),
+    storageState: json().$type<StorageState>(),
+    userId: integer()
+      .references(() => user.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (t) => [unique().on(t.userId, t.sourceType, t.email)],
+);
 
 export const product = pgTable(
   "product",
@@ -33,7 +50,7 @@ export const product = pgTable(
       .notNull()
       .default(sql`ARRAY[]::text[]`),
     saleEndDate: timestamp().notNull(),
-    productType: productType().notNull(),
+    sourceType: sourceType().notNull(),
   },
   (t) => [unique().on(t.url, t.saleEndDate)],
 );
@@ -50,23 +67,3 @@ export const userToProduct = pgTable(
   },
   (t) => [primaryKey({ name: "id", columns: [t.userId, t.productId] })],
 );
-
-export const authState = pgTable(
-  "authState",
-  {
-    id: serial().primaryKey(),
-    productType: productType().notNull(),
-    storageState: json().$type<StorageState>(),
-    authSecret: text(),
-    userId: integer()
-      .references(() => user.id, { onDelete: "cascade" })
-      .notNull(),
-  },
-  (t) => [unique().on(t.userId, t.productType)],
-);
-
-export const coupon = pgTable("coupon", {
-  id: serial().primaryKey(),
-  code: varchar().unique().notNull(),
-  userId: integer().references(() => user.id, { onDelete: "cascade" }),
-});

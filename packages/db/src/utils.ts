@@ -1,6 +1,6 @@
 import { db } from "./index.ts";
-import { authState, product, userToProduct } from "./schema.ts";
-import type { CreateProductInput, Product, ProductType, StorageState, User } from "./types.ts";
+import { product, userToProduct } from "./schema.ts";
+import type { CreateProductInput, Product, SourceType, StorageState, User } from "./types.ts";
 
 export async function saveProduct(values: CreateProductInput): Promise<Product> {
   const [result] = await db
@@ -15,14 +15,15 @@ export async function saveProduct(values: CreateProductInput): Promise<Product> 
   return result;
 }
 
-export async function saveStorageState(userId: User["id"], productType: ProductType, storageState: StorageState) {
-  return await db
-    .insert(authState)
-    .values({ userId, productType, storageState })
-    .onConflictDoUpdate({
-      target: [authState.userId, authState.productType],
-      set: { storageState },
-    });
+export async function saveStorageState(userId: User["id"], sourceType: SourceType, storageState: StorageState) {
+  // TODO: Implement this function to save the storage state for a user's product source.
+  // return await db
+  //   .insert(authState)
+  //   .values({ userId, sourceType, storageState })
+  //   .onConflictDoUpdate({
+  //     target: [authState.userId, authState.sourceType],
+  //     set: { storageState },
+  //   });
 }
 
 export async function addToClaimedProducts(userId: User["id"], productId: Product["id"]) {

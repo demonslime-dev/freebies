@@ -1,4 +1,5 @@
-import { drizzle } from "drizzle-orm/neon-http";
+// import { drizzle } from 'drizzle-orm/neon-http';
+import { drizzle } from "drizzle-orm/node-postgres";
 import { env } from "./env.ts";
 import { relations } from "./relations.ts";
 

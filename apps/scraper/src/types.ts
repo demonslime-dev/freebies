@@ -1,6 +1,6 @@
-import type { CreateProductInput, ProductType } from "@freebies/db/types";
+import type { CreateProductInput, SourceType } from "@freebies/db/types";
 
 export interface Scraper {
-  productType: ProductType;
+  sourceType: SourceType;
   scrape(): Promise<CreateProductInput[]>;
 }

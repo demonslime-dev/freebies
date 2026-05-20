@@ -48,7 +48,7 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<CreateProductI
         title: title,
         images: [imageUrl],
         saleEndDate: new Date(saleEndDate),
-        productType: "Unity",
+        sourceType: "assetstore.unity.com",
       },
     ];
   } catch (error) {
@@ -67,6 +67,6 @@ function getSaleEndDate(text: string): string {
 }
 
 export default {
-  productType: "Unity",
+  sourceType: "assetstore.unity.com",
   scrape: getFreeAssetsFromUnityAssetStore,
 } satisfies Scraper;

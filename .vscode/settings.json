@@ -8,5 +8,6 @@
     ".vscode": true,
     "node_modules": true
   },
-  "deno.enable": true
+  "deno.enable": true,
+  "cSpell.words": ["assetstore"]
 }

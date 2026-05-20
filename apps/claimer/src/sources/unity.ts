@@ -105,7 +105,7 @@ async function getCouponCode(context: BrowserContext) {
 }
 
 export default {
-  productType: "Unity",
+  sourceType: "assetstore.unity.com",
   isAuthenticated,
   authenticate,
   claim,

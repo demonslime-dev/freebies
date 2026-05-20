@@ -12,6 +12,7 @@
   "imports": {
     "drizzle-kit": "npm:drizzle-kit@beta",
     "drizzle-orm": "npm:drizzle-orm@beta",
-    "@neondatabase/serverless": "npm:@neondatabase/serverless@^1.0.2"
+    "@neondatabase/serverless": "npm:@neondatabase/serverless@^1.0.2",
+    "pg": "npm:pg@^8.21.0"
   }
 }

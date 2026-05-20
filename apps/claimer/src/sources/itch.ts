@@ -74,7 +74,7 @@ async function claim(url: string, context: BrowserContext) {
 }
 
 export default {
-  productType: "Itch",
+  sourceType: "itch.io",
   isAuthenticated,
   authenticate,
   claim,
