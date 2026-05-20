@@ -20,10 +20,10 @@ export const user = pgTable("user", {
 
 export const sources = ["assetstore.unity.com", "fab.com", "itch.io"] as const;
 
-export const sourceType = pgEnum("sourceType", sources);
+export const sourceType = pgEnum("source_type", sources);
 
 export const productSource = pgTable(
-  "productSource",
+  "product_source",
   {
     id: serial().primaryKey(),
     sourceType: sourceType().notNull(),
@@ -56,7 +56,7 @@ export const product = pgTable(
 );
 
 export const userToProduct = pgTable(
-  "userToProduct",
+  "user_to_product",
   {
     userId: integer()
       .references(() => user.id, { onDelete: "cascade" })
