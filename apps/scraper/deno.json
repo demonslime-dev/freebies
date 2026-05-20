@@ -1,6 +1,9 @@
 {
   "name": "@freebies/scraper",
   "exports": "./src/index.ts",
+  "compilerOptions": {
+    "lib": ["deno.window", "deno.unstable", "node", "dom"]
+  },
   "tasks": {
     "scrape": "deno run --env-file -A ./src/index.ts"
   },
