@@ -32,7 +32,7 @@ for (const { id, name, productSources, claimedProducts } of users) {
     const claimer = claimers.get(sourceType);
     if (!claimer) throw Error(`Couldn't get the claimer for ${sourceType}`);
     await claimer.authenticate({ email, password, authSecret }, context);
-    await saveStorageState(userId, sourceType, await context.storageState());
+    await saveStorageState(userId, email, sourceType, await context.storageState());
 
     const successfullyClaimedProducts: Product[] = [];
     const failedToClaimProducts: Product[] = [];

@@ -1,5 +1,6 @@
+import { and, eq } from "drizzle-orm";
 import { db } from "./index.ts";
-import { product, userToProduct } from "./schema.ts";
+import { product, productSource, userToProduct } from "./schema.ts";
 import type { CreateProductInput, Product, SourceType, StorageState, User } from "./types.ts";
 
 export async function saveProduct(values: CreateProductInput): Promise<Product> {
@@ -15,8 +16,20 @@ export async function saveProduct(values: CreateProductInput): Promise<Product> 
   return result;
 }
 
-export async function saveStorageState(userId: User["id"], sourceType: SourceType, storageState: StorageState) {
+export async function saveStorageState(
+  userId: User["id"],
+  email: string,
+  sourceType: SourceType,
+  storageState: StorageState,
+) {
   // TODO: Implement this function to save the storage state for a user's product source.
+  return await db
+    .update(productSource)
+    .set({ storageState })
+    .where(
+      and(eq(productSource.userId, userId), eq(productSource.email, email), eq(productSource.sourceType, sourceType)),
+    );
+
   // return await db
   //   .insert(authState)
   //   .values({ userId, sourceType, storageState })
