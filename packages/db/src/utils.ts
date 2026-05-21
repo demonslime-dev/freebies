@@ -22,19 +22,10 @@ export async function saveStorageState(
   platform: StorePlatform,
   storageState: StorageState,
 ) {
-  // TODO: Implement this function to save the storage state for a user's product source.
   return await db
     .update(storeAccount)
     .set({ storageState })
     .where(and(eq(storeAccount.userId, userId), eq(storeAccount.email, email), eq(storeAccount.platform, platform)));
-
-  // return await db
-  //   .insert(authState)
-  //   .values({ userId, platform, storageState })
-  //   .onConflictDoUpdate({
-  //     target: [authState.userId, authState.platform],
-  //     set: { storageState },
-  //   });
 }
 
 export async function addToClaimedProducts(userId: User["id"], productId: Product["id"]) {

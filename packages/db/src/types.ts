@@ -8,6 +8,8 @@ export type CreateStoreAccountInput = typeof storeAccount.$inferInsert;
 
 export type StorePlatform = (typeof storePlatform.enumValues)[number];
 
+export type StoreAccount = typeof storeAccount.$inferSelect;
+
 export type User = typeof user.$inferSelect;
 
 export interface StorageState {
