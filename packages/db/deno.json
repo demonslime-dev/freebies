@@ -5,9 +5,16 @@
     "./types": "./src/types.ts"
   },
   "tasks": {
-    "db:push": "deno run --env-file -A drizzle-kit push --force",
     "db:studio": "deno run --env-file -A drizzle-kit studio --verbose",
-    "db:seed": "deno run --env-file -A ./src/private/createUsers.ts"
+    "db:reset": "deno run --env-file -A ./src/reset.ts",
+    "db:push": {
+      "command": "deno run --env-file -A drizzle-kit push --force",
+      "dependencies": ["db:reset"]
+    },
+    "db:seed": {
+      "command": "deno run --env-file -A ./src/seed.ts",
+      "dependencies": ["db:push"]
+    }
   },
   "imports": {
     "drizzle-kit": "npm:drizzle-kit@beta",

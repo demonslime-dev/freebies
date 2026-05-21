@@ -4,8 +4,9 @@
   "tasks": {
     "scraper:scrape": "deno task -f @freebies/scraper scrape",
     "claimer:claim": "deno task -f @freebies/claimer claim",
-    "db:push": "deno task -f @freebies/db db:push",
     "db:studio": "deno task -f @freebies/db db:studio",
+    "db:reset": "deno task -f @freebies/db db:reset",
+    "db:push": "deno task -f @freebies/db db:push",
     "db:seed": "deno task -f @freebies/db db:seed"
   },
   "imports": {
