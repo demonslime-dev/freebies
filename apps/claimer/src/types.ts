@@ -1,4 +1,4 @@
-import type { SourceType } from "@freebies/db/types";
+import type { StorePlatform } from "@freebies/db/types";
 import type { BrowserContext, Page } from "patchright";
 
 export interface UserCredentials {
@@ -8,7 +8,7 @@ export interface UserCredentials {
 }
 
 export interface Claimer {
-  sourceType: SourceType;
+  platform: StorePlatform;
   isAuthenticated(page: Page): Promise<boolean>;
   isAuthenticated(context: BrowserContext): Promise<boolean>;
   authenticate(user: UserCredentials, context: BrowserContext): Promise<void>;

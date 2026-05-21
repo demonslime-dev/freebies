@@ -1,12 +1,12 @@
-import type { product, productSource, sourceType, user } from "./schema.ts";
+import type { product, storeAccount, storePlatform, user } from "./schema.ts";
 
 export type Product = typeof product.$inferSelect;
 
 export type CreateProductInput = typeof product.$inferInsert;
 
-export type CreateProductSourceInput = typeof productSource.$inferInsert;
+export type CreateStoreAccountInput = typeof storeAccount.$inferInsert;
 
-export type SourceType = (typeof sourceType.enumValues)[number];
+export type StorePlatform = (typeof storePlatform.enumValues)[number];
 
 export type User = typeof user.$inferSelect;
 

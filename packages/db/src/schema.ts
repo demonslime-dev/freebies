@@ -16,17 +16,33 @@ import type { StorageState } from "./types.ts";
 export const user = pgTable("user", {
   id: serial().primaryKey(),
   name: varchar().notNull(),
+  createdAt: timestamp().defaultNow().notNull(),
 });
 
-export const sources = ["assetstore.unity.com", "fab.com", "itch.io"] as const;
+export const authProviderType = pgEnum("auth_provider", ["telegram"]);
 
-export const sourceType = pgEnum("source_type", sources);
-
-export const productSource = pgTable(
-  "product_source",
+export const authProvider = pgTable(
+  "auth_provider",
   {
     id: serial().primaryKey(),
-    sourceType: sourceType().notNull(),
+    userId: integer()
+      .references(() => user.id, { onDelete: "cascade" })
+      .notNull(),
+    provider: authProviderType().notNull(),
+    providerUserId: varchar().notNull(),
+    createdAt: timestamp().defaultNow().notNull(),
+  },
+  (t) => [unique().on(t.provider, t.providerUserId)],
+);
+
+export const storePlatforms = ["assetstore.unity.com", "fab.com", "itch.io"] as const;
+export const storePlatform = pgEnum("store_platform", storePlatforms);
+
+export const storeAccount = pgTable(
+  "store_account",
+  {
+    id: serial().primaryKey(),
+    platform: storePlatform().notNull(),
     email: varchar().notNull(),
     password: varchar().notNull(),
     authSecret: text(),
@@ -36,7 +52,7 @@ export const productSource = pgTable(
       .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
   },
-  (t) => [unique().on(t.userId, t.sourceType, t.email)],
+  (t) => [unique().on(t.userId, t.platform, t.email)],
 );
 
 export const product = pgTable(
@@ -50,13 +66,13 @@ export const product = pgTable(
       .notNull()
       .default(sql`ARRAY[]::text[]`),
     saleEndDate: timestamp().notNull(),
-    sourceType: sourceType().notNull(),
+    platform: storePlatform().notNull(),
   },
   (t) => [unique().on(t.url, t.saleEndDate)],
 );
 
-export const userToProduct = pgTable(
-  "user_to_product",
+export const claimedProduct = pgTable(
+  "claimed_product",
   {
     userId: integer()
       .references(() => user.id, { onDelete: "cascade" })

@@ -1,26 +1,26 @@
 import { addToClaimedProducts, db, getProductsToClaim, getUnclaimedProducts, saveStorageState } from "@freebies/db";
-import type { Product, SourceType } from "@freebies/db/types";
+import type { Product, StorePlatform } from "@freebies/db/types";
 import { AlreadyClaimedError, createBrowserContext, notifyFailure, notifySuccess } from "@freebies/utils";
 import { expandGlob } from "@std/fs";
 import { fromPromise } from "neverthrow";
 import type { Claimer } from "./types.ts";
 
 const productsToClaim = await getProductsToClaim();
-const groupedProducts = Map.groupBy(productsToClaim, (product) => product.sourceType);
-const users = await db.query.user.findMany({ with: { productSources: true, claimedProducts: true } });
+const groupedProducts = Map.groupBy(productsToClaim, (product) => product.platform);
+const users = await db.query.user.findMany({ with: { storeAccounts: true, claimedProducts: true } });
 
-const claimers = new Map<SourceType, Claimer>();
+const claimers = new Map<StorePlatform, Claimer>();
 for await (const file of expandGlob("./sources/*.ts", { root: import.meta.dirname })) {
   const module = await import(file.path);
   const claimer: Claimer = module.default;
-  claimers.set(claimer.sourceType, claimer);
+  claimers.set(claimer.platform, claimer);
 }
 
-for (const { id, name, productSources, claimedProducts } of users) {
-  for (const { userId, email, password, authSecret, storageState, sourceType } of productSources) {
-    console.log(`Claiming products from ${sourceType} as ${email}`);
+for (const { id, name, storeAccounts, claimedProducts } of users) {
+  for (const { userId, email, password, authSecret, storageState, platform } of storeAccounts) {
+    console.log(`Claiming products from ${platform} as ${email}`);
 
-    const products = groupedProducts.get(sourceType) ?? [];
+    const products = groupedProducts.get(platform) ?? [];
     const unclaimedProducts = getUnclaimedProducts(products, claimedProducts);
 
     if (unclaimedProducts.length === 0) {
@@ -29,10 +29,10 @@ for (const { id, name, productSources, claimedProducts } of users) {
     }
 
     const context = await createBrowserContext(storageState);
-    const claimer = claimers.get(sourceType);
-    if (!claimer) throw Error(`Couldn't get the claimer for ${sourceType}`);
+    const claimer = claimers.get(platform);
+    if (!claimer) throw Error(`Couldn't get the claimer for ${platform}`);
     await claimer.authenticate({ email, password, authSecret }, context);
-    await saveStorageState(userId, email, sourceType, await context.storageState());
+    await saveStorageState(userId, email, platform, await context.storageState());
 
     const successfullyClaimedProducts: Product[] = [];
     const failedToClaimProducts: Product[] = [];
@@ -60,7 +60,7 @@ for (const { id, name, productSources, claimedProducts } of users) {
     }
 
     await context.browser()?.close();
-    await fromPromise(notifyFailure(email, sourceType, failedToClaimProducts), console.error);
-    await fromPromise(notifySuccess(email, sourceType, successfullyClaimedProducts), console.error);
+    await fromPromise(notifyFailure(email, platform, failedToClaimProducts), console.error);
+    await fromPromise(notifySuccess(email, platform, successfullyClaimedProducts), console.error);
   }
 }

@@ -1,12 +1,16 @@
 import { defineRelations } from "drizzle-orm";
-import { product, productSource, user, userToProduct } from "./schema.ts";
+import * as schema from "./schema.ts";
 
-export const relations = defineRelations({ productSource, product, user, userToProduct }, (r) => ({
+export const relations = defineRelations(schema, (r) => ({
   user: {
-    productSources: r.many.productSource({ from: r.user.id, to: r.productSource.userId }),
+    authProviders: r.many.authProvider({ from: r.user.id, to: r.authProvider.userId }),
+    storeAccounts: r.many.storeAccount({ from: r.user.id, to: r.storeAccount.userId }),
     claimedProducts: r.many.product({
-      from: r.user.id.through(r.userToProduct.userId),
-      to: r.product.id.through(r.userToProduct.productId),
+      from: r.user.id.through(r.claimedProduct.userId),
+      to: r.product.id.through(r.claimedProduct.productId),
     }),
+  },
+  userAuthProvider: {
+    user: r.one.user({ from: r.authProvider.userId, to: r.user.id }),
   },
 }));

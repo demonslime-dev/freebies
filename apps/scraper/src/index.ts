@@ -8,7 +8,7 @@ for await (const file of expandGlob("./sources/*.ts", { root: import.meta.dirnam
   const module = await import(file.path);
   const scraper: Scraper = module.default;
   // For testing purpose
-  // if (scraper.sourceType !== "Unity") continue;
+  // if (scraper.platform !== "Unity") continue;
   const scrapedProducts = await scraper.scrape();
   products = [...products, ...scrapedProducts];
 }

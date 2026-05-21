@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "./index.ts";
-import { product, productSource, userToProduct } from "./schema.ts";
-import type { CreateProductInput, Product, SourceType, StorageState, User } from "./types.ts";
+import { claimedProduct, product, storeAccount } from "./schema.ts";
+import type { CreateProductInput, Product, StorageState, StorePlatform, User } from "./types.ts";
 
 export async function saveProduct(values: CreateProductInput): Promise<Product> {
   const [result] = await db
@@ -19,28 +19,26 @@ export async function saveProduct(values: CreateProductInput): Promise<Product> 
 export async function saveStorageState(
   userId: User["id"],
   email: string,
-  sourceType: SourceType,
+  platform: StorePlatform,
   storageState: StorageState,
 ) {
   // TODO: Implement this function to save the storage state for a user's product source.
   return await db
-    .update(productSource)
+    .update(storeAccount)
     .set({ storageState })
-    .where(
-      and(eq(productSource.userId, userId), eq(productSource.email, email), eq(productSource.sourceType, sourceType)),
-    );
+    .where(and(eq(storeAccount.userId, userId), eq(storeAccount.email, email), eq(storeAccount.platform, platform)));
 
   // return await db
   //   .insert(authState)
-  //   .values({ userId, sourceType, storageState })
+  //   .values({ userId, platform, storageState })
   //   .onConflictDoUpdate({
-  //     target: [authState.userId, authState.sourceType],
+  //     target: [authState.userId, authState.platform],
   //     set: { storageState },
   //   });
 }
 
 export async function addToClaimedProducts(userId: User["id"], productId: Product["id"]) {
-  await db.insert(userToProduct).values({ userId, productId }).onConflictDoNothing();
+  await db.insert(claimedProduct).values({ userId, productId }).onConflictDoNothing();
 }
 
 export function getUnclaimedProducts(products: Product[], claimed: Product[]) {

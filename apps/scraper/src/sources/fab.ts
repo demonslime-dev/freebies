@@ -44,7 +44,7 @@ export async function getFreeAssetsFromFab(): Promise<CreateProductInput[]> {
         url,
         images: [imageUrl],
         saleEndDate: new Date(saleEndDate),
-        sourceType: "fab.com",
+        platform: "fab.com",
       });
     }
 
@@ -59,6 +59,6 @@ export async function getFreeAssetsFromFab(): Promise<CreateProductInput[]> {
 }
 
 export default {
-  sourceType: "fab.com",
+  platform: "fab.com",
   scrape: getFreeAssetsFromFab,
 } satisfies Scraper;
