@@ -4,7 +4,7 @@ import { authProvider, claimedProduct, product, storeAccount, user } from "./sch
 import type { AuthProviderType, CreateProductInput, Product, StorageState, StorePlatform, User } from "./types.ts";
 
 export async function getOrCreateUser(providerUserId: string, provider: AuthProviderType, name: string) {
-  const existingUser = await db.query.user.findFirst({ where: { authProviders: { providerUserId } } });
+  const existingUser = await db.query.user.findFirst({ where: { authProviders: { provider, providerUserId } } });
   if (existingUser) return existingUser;
   const [newUser] = await db.insert(user).values({ name }).returning();
   await db.insert(authProvider).values({ userId: newUser.id, provider, providerUserId });

@@ -39,10 +39,14 @@ export const authProvider = pgTable(
 export const storePlatforms = ["assetstore.unity.com", "fab.com", "itch.io"] as const;
 export const storePlatform = pgEnum("store_platform", storePlatforms);
 
+export const storeAccountStatusValues = ["valid", "invalid", "needs_relogin"] as const;
+export const storeAccountStatus = pgEnum("store_account_status", storeAccountStatusValues);
+
 export const storeAccount = pgTable(
   "store_account",
   {
     id: serial().primaryKey(),
+    status: storeAccountStatus().notNull().default("valid"),
     platform: storePlatform().notNull(),
     email: varchar().notNull(),
     password: varchar().notNull(),
