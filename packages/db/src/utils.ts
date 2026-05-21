@@ -1,24 +1,48 @@
 import { and, eq } from "drizzle-orm";
+import { type ResultAsync, errAsync, okAsync } from "neverthrow";
 import { db } from "./index.ts";
 import { authProvider, claimedProduct, product, storeAccount, user } from "./schema.ts";
-import type { AuthProviderType, CreateProductInput, Product, StorageState, StorePlatform, User } from "./types.ts";
+import type {
+  AuthProviderType,
+  CreateProductInput,
+  Product,
+  StorageState,
+  StoreAccount,
+  StorePlatform,
+  User,
+} from "./types.ts";
 
-export async function getOrCreateUser(providerUserId: string, provider: AuthProviderType, name: string) {
-  const existingUser = await db.query.user.findFirst({ where: { authProviders: { provider, providerUserId } } });
-  if (existingUser) return existingUser;
+export async function getOrCreateUser(
+  providerUserId: string,
+  provider: AuthProviderType,
+  name: string,
+): Promise<ResultAsync<User, Error>> {
+  const existingUser = await db.query.user.findFirst({
+    where: { authProviders: { provider, providerUserId } },
+  });
+
+  if (existingUser) return okAsync(existingUser);
   const [newUser] = await db.insert(user).values({ name }).returning();
   await db.insert(authProvider).values({ userId: newUser.id, provider, providerUserId });
-  return newUser;
+  return okAsync(newUser);
 }
 
-export async function getStoreAccounts(providerUserId: string, provider: AuthProviderType) {
+export async function getStoreAccounts(
+  providerUserId: string,
+  provider: AuthProviderType,
+): Promise<ResultAsync<StoreAccount[], Error>> {
   const user = await db.query.user.findFirst({
     where: { authProviders: { provider, providerUserId } },
     with: { storeAccounts: true },
   });
 
-  if (!user) return null;
-  return user.storeAccounts;
+  if (!user) {
+    return errAsync(
+      new Error(`No user found for the given provider: ${provider} and providerUserId: ${providerUserId}`),
+    );
+  }
+
+  return okAsync(user.storeAccounts);
 }
 
 export async function saveProduct(values: CreateProductInput): Promise<Product> {
