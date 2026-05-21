@@ -1,7 +1,15 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "./index.ts";
-import { claimedProduct, product, storeAccount } from "./schema.ts";
-import type { CreateProductInput, Product, StorageState, StorePlatform, User } from "./types.ts";
+import { authProvider, claimedProduct, product, storeAccount, user } from "./schema.ts";
+import type { AuthProviderType, CreateProductInput, Product, StorageState, StorePlatform, User } from "./types.ts";
+
+export async function getOrCreateUser(providerUserId: string, provider: AuthProviderType, name: string) {
+  const existingUser = await db.query.user.findFirst({ where: { authProviders: { providerUserId } } });
+  if (existingUser) return existingUser;
+  const [newUser] = await db.insert(user).values({ name }).returning();
+  await db.insert(authProvider).values({ userId: newUser.id, provider, providerUserId });
+  return newUser;
+}
 
 export async function saveProduct(values: CreateProductInput): Promise<Product> {
   const [result] = await db

@@ -1,4 +1,4 @@
-import type { product, storeAccount, storePlatform, user } from "./schema.ts";
+import type { authProviderType, product, storeAccount, storePlatform, user } from "./schema.ts";
 
 export type Product = typeof product.$inferSelect;
 
@@ -9,6 +9,8 @@ export type CreateStoreAccountInput = typeof storeAccount.$inferInsert;
 export type StorePlatform = (typeof storePlatform.enumValues)[number];
 
 export type StoreAccount = typeof storeAccount.$inferSelect;
+
+export type AuthProviderType = (typeof authProviderType.enumValues)[number];
 
 export type User = typeof user.$inferSelect;
 

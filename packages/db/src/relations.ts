@@ -10,7 +10,7 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.product.id.through(r.claimedProduct.productId),
     }),
   },
-  userAuthProvider: {
+  authProvider: {
     user: r.one.user({ from: r.authProvider.userId, to: r.user.id }),
   },
 }));

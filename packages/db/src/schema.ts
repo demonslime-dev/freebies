@@ -19,7 +19,8 @@ export const user = pgTable("user", {
   createdAt: timestamp().defaultNow().notNull(),
 });
 
-export const authProviderType = pgEnum("auth_provider-type", ["telegram"]);
+const authProviderTypes = ["telegram", "discord", "google"] as const;
+export const authProviderType = pgEnum("auth_provider-type", authProviderTypes);
 
 export const authProvider = pgTable(
   "auth_provider",
