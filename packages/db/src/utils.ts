@@ -11,6 +11,16 @@ export async function getOrCreateUser(providerUserId: string, provider: AuthProv
   return newUser;
 }
 
+export async function getStoreAccounts(providerUserId: string, provider: AuthProviderType) {
+  const user = await db.query.user.findFirst({
+    where: { authProviders: { provider, providerUserId } },
+    with: { storeAccounts: true },
+  });
+
+  if (!user) return null;
+  return user.storeAccounts;
+}
+
 export async function saveProduct(values: CreateProductInput): Promise<Product> {
   const [result] = await db
     .insert(product)
