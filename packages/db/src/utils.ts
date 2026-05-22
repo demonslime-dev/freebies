@@ -5,6 +5,7 @@ import { authProvider, claimedProduct, product, storeAccount, user } from "./sch
 import type {
   AuthProviderType,
   CreateProductInput,
+  CreateStoreAccountInput,
   Product,
   StorageState,
   StoreAccount,
@@ -12,37 +13,80 @@ import type {
   User,
 } from "./types.ts";
 
-export async function getOrCreateUser(
-  providerUserId: string,
-  provider: AuthProviderType,
-  name: string,
-): Promise<ResultAsync<User, Error>> {
-  const existingUser = await db.query.user.findFirst({
-    where: { authProviders: { provider, providerUserId } },
-  });
+export async function getUser(provider: AuthProviderType, providerUserId: string): Promise<ResultAsync<User, Error>> {
+  try {
+    const userOrNull = await db.query.user.findFirst({
+      where: { authProviders: { provider, providerUserId } },
+    });
 
-  if (existingUser) return okAsync(existingUser);
-  const [newUser] = await db.insert(user).values({ name }).returning();
-  await db.insert(authProvider).values({ userId: newUser.id, provider, providerUserId });
-  return okAsync(newUser);
-}
-
-export async function getStoreAccounts(
-  providerUserId: string,
-  provider: AuthProviderType,
-): Promise<ResultAsync<StoreAccount[], Error>> {
-  const user = await db.query.user.findFirst({
-    where: { authProviders: { provider, providerUserId } },
-    with: { storeAccounts: true },
-  });
-
-  if (!user) {
+    if (userOrNull) return okAsync(userOrNull);
     return errAsync(
       new Error(`No user found for the given provider: ${provider} and providerUserId: ${providerUserId}`),
     );
+  } catch (error) {
+    return errAsync(error instanceof Error ? error : new Error(String(error)));
   }
+}
 
-  return okAsync(user.storeAccounts);
+export async function getOrCreateUser(
+  provider: AuthProviderType,
+  providerUserId: string,
+  userData: typeof user.$inferInsert,
+): Promise<ResultAsync<User, Error>> {
+  try {
+    const userResult = await getUser(provider, providerUserId);
+    if (userResult.isOk()) return userResult;
+
+    const [newUser] = await db.insert(user).values(userData).returning();
+    await db.insert(authProvider).values({ userId: newUser.id, provider, providerUserId });
+    return okAsync(newUser);
+  } catch (error) {
+    return errAsync(error instanceof Error ? error : new Error(String(error)));
+  }
+}
+
+export async function getStoreAccounts(
+  provider: AuthProviderType,
+  providerUserId: string,
+): Promise<ResultAsync<StoreAccount[], Error>> {
+  try {
+    const user = await getUser(provider, providerUserId);
+
+    if (user.isErr()) {
+      return errAsync(user.error);
+    }
+
+    const storeAccounts = await db.query.storeAccount.findMany({
+      where: { userId: user.value.id },
+    });
+
+    return okAsync(storeAccounts);
+  } catch (error) {
+    return errAsync(error instanceof Error ? error : new Error(String(error)));
+  }
+}
+
+export async function addStoreAccount(
+  provider: AuthProviderType,
+  providerUserId: string,
+  credentials: Omit<CreateStoreAccountInput, "userId">,
+): Promise<ResultAsync<StoreAccount, Error>> {
+  try {
+    const user = await getUser(provider, providerUserId);
+
+    if (user.isErr()) {
+      return errAsync(user.error);
+    }
+
+    const [linkedStoreAccount] = await db
+      .insert(storeAccount)
+      .values({ ...credentials, userId: user.value.id })
+      .returning();
+
+    return okAsync(linkedStoreAccount);
+  } catch (error) {
+    return errAsync(error instanceof Error ? error : new Error(String(error)));
+  }
 }
 
 export async function saveProduct(values: CreateProductInput): Promise<Product> {
