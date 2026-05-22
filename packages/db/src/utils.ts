@@ -13,6 +13,20 @@ import type {
   User,
 } from "./types.ts";
 
+export async function createUser(
+  provider: AuthProviderType,
+  providerUserId: string,
+  userData: typeof user.$inferInsert,
+): Promise<ResultAsync<User, Error>> {
+  try {
+    const [newUser] = await db.insert(user).values(userData).onConflictDoNothing().returning();
+    await db.insert(authProvider).values({ provider, providerUserId, userId: newUser.id });
+    return okAsync(newUser);
+  } catch (error) {
+    return errAsync(error instanceof Error ? error : new Error(String(error)));
+  }
+}
+
 export async function getUser(provider: AuthProviderType, providerUserId: string): Promise<ResultAsync<User, Error>> {
   try {
     const userOrNull = await db.query.user.findFirst({
@@ -37,9 +51,7 @@ export async function getOrCreateUser(
     const userResult = await getUser(provider, providerUserId);
     if (userResult.isOk()) return userResult;
 
-    const [newUser] = await db.insert(user).values(userData).returning();
-    await db.insert(authProvider).values({ userId: newUser.id, provider, providerUserId });
-    return okAsync(newUser);
+    return await createUser(provider, providerUserId, userData);
   } catch (error) {
     return errAsync(error instanceof Error ? error : new Error(String(error)));
   }
