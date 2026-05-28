@@ -1,4 +1,4 @@
-import { AlreadyClaimedError, UnauthorizedError } from "@freebies/utils";
+import { AlreadyClaimedError, NotClaimable, UnauthorizedError } from "@freebies/utils";
 import { createGuardrails, generate } from "otplib";
 import type { BrowserContext, Page } from "patchright";
 import type { Claimer, UserCredentials } from "../types.ts";
@@ -91,7 +91,11 @@ async function claim(url: string, context: BrowserContext) {
     const activePage = popupPage ?? page;
 
     // Wait for the final claim page to load
-    await activePage.getByRole("button", { name: "Claim" }).click({ timeout: 5000 });
+    try {
+      await activePage.getByRole("button", { name: "Claim" }).click({ timeout: 5000 });
+    } catch {
+      throw new NotClaimable();
+    }
     await activePage.getByText("You claimed this").waitFor({ state: "visible", timeout: 5000 });
   } finally {
     // FINALLY BLOCK: This runs 100% of the time, whether the code succeeded or threw an error.

@@ -32,6 +32,12 @@ export class AlreadyClaimedError extends BaseError {
   }
 }
 
+export class NotClaimable extends BaseError {
+  constructor(message?: string, options?: ErrorOptions) {
+    super(message ?? "Product is not claimable", options);
+  }
+}
+
 export class PropertyNotFoundError extends NotFoundError {
   constructor(property: string, options?: ErrorOptions) {
     super(`Unable to retrieve property: ${property}`, options);

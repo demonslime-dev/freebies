@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   integer,
   json,
   pgEnum,
@@ -72,6 +73,7 @@ export const product = pgTable(
       .default(sql`ARRAY[]::text[]`),
     saleEndDate: timestamp().notNull(),
     platform: storePlatform().notNull(),
+    claimable: boolean().notNull().default(true),
   },
   (t) => [unique().on(t.url, t.saleEndDate)],
 );

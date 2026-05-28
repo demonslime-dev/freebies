@@ -135,5 +135,9 @@ export function getUnclaimedProducts(products: Product[], claimed: Product[]) {
 }
 
 export function getProductsToClaim() {
-  return db.query.product.findMany({ where: { saleEndDate: { gt: new Date() } } });
+  return db.query.product.findMany({ where: { saleEndDate: { gt: new Date() }, claimable: { eq: true } } });
+}
+
+export function markNotClaimable(productId: Product["id"]) {
+  return db.update(product).set({ claimable: false }).where(eq(product.id, productId));
 }

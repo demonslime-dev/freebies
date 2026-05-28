@@ -1,6 +1,13 @@
-import { addToClaimedProducts, db, getProductsToClaim, getUnclaimedProducts, saveStorageState } from "@freebies/db";
+import {
+  addToClaimedProducts,
+  db,
+  getProductsToClaim,
+  getUnclaimedProducts,
+  markNotClaimable,
+  saveStorageState,
+} from "@freebies/db";
 import type { Product, StorePlatform } from "@freebies/db/types";
-import { AlreadyClaimedError, createBrowserContext, notifyFailure, notifySuccess } from "@freebies/utils";
+import { AlreadyClaimedError, createBrowserContext, NotClaimable, notifyFailure, notifySuccess } from "@freebies/utils";
 import { expandGlob } from "@std/fs";
 import { fromPromise } from "neverthrow";
 import type { Claimer } from "./types.ts";
@@ -52,6 +59,10 @@ for (const { id, name, storeAccounts, claimedProducts } of users) {
       } else {
         if (result.error instanceof AlreadyClaimedError) {
           await fromPromise(addToClaimedProducts(userId, product.id), console.log);
+          continue;
+        } else if (result.error instanceof NotClaimable) {
+          console.error(`Product is not claimable: ${product.url}`);
+          await fromPromise(markNotClaimable(product.id), console.error);
           continue;
         }
 
