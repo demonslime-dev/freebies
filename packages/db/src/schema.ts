@@ -1,39 +1,28 @@
 import { sql } from "drizzle-orm";
-import {
-  boolean,
-  integer,
-  json,
-  pgEnum,
-  pgTable,
-  primaryKey,
-  serial,
-  text,
-  timestamp,
-  unique,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { pgEnum, primaryKey, snakeCase, unique } from "drizzle-orm/pg-core";
 import type { StorageState } from "./types.ts";
 
-export const user = pgTable("user", {
-  id: serial().primaryKey(),
-  name: varchar().notNull(),
-  createdAt: timestamp().defaultNow().notNull(),
-});
+export const user = snakeCase.table("user", (t) => ({
+  id: t.serial().primaryKey(),
+  name: t.varchar().notNull(),
+  createdAt: t.timestamp().defaultNow().notNull(),
+}));
 
 const authProviderTypes = ["telegram", "discord", "google"] as const;
 export const authProviderType = pgEnum("auth_provider-type", authProviderTypes);
 
-export const authProvider = pgTable(
+export const authProvider = snakeCase.table(
   "auth_provider",
-  {
-    id: serial().primaryKey(),
-    userId: integer()
+  (t) => ({
+    id: t.serial().primaryKey(),
+    userId: t
+      .integer()
       .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
     provider: authProviderType().notNull(),
-    providerUserId: varchar().notNull(),
-    createdAt: timestamp().defaultNow().notNull(),
-  },
+    providerUserId: t.varchar().notNull(),
+    createdAt: t.timestamp().defaultNow().notNull(),
+  }),
   (t) => [unique().on(t.provider, t.providerUserId)],
 );
 
@@ -43,50 +32,54 @@ export const storePlatform = pgEnum("store_platform", storePlatforms);
 export const storeAccountStatusValues = ["valid", "invalid", "needs_relogin"] as const;
 export const storeAccountStatus = pgEnum("store_account_status", storeAccountStatusValues);
 
-export const storeAccount = pgTable(
+export const storeAccount = snakeCase.table(
   "store_account",
-  {
-    id: serial().primaryKey(),
+  (t) => ({
+    id: t.serial().primaryKey(),
     status: storeAccountStatus().notNull().default("valid"),
     platform: storePlatform().notNull(),
-    email: varchar().notNull(),
-    password: varchar().notNull(),
-    authSecret: text(),
-    data: json().default(sql`'{}'::json`),
-    storageState: json().$type<StorageState>(),
-    userId: integer()
+    email: t.varchar().notNull(),
+    password: t.varchar().notNull(),
+    authSecret: t.text(),
+    data: t.json().default(sql`'{}'::json`),
+    storageState: t.json().$type<StorageState>(),
+    userId: t
+      .integer()
       .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
-  },
+  }),
   (t) => [unique().on(t.userId, t.platform, t.email)],
 );
 
-export const product = pgTable(
+export const product = snakeCase.table(
   "product",
-  {
-    id: serial().primaryKey(),
-    url: text().notNull(),
-    title: text().notNull(),
-    images: text()
+  (t) => ({
+    id: t.serial().primaryKey(),
+    url: t.text().notNull(),
+    title: t.text().notNull(),
+    images: t
+      .text()
       .array()
       .notNull()
       .default(sql`ARRAY[]::text[]`),
-    saleEndDate: timestamp().notNull(),
+    saleEndDate: t.timestamp().notNull(),
     platform: storePlatform().notNull(),
-    claimable: boolean().notNull().default(true),
-  },
+    claimable: t.boolean().notNull().default(true),
+  }),
   (t) => [unique().on(t.url, t.saleEndDate)],
 );
 
-export const claimedProduct = pgTable(
+export const claimedProduct = snakeCase.table(
   "claimed_product",
-  {
-    userId: integer()
+  (t) => ({
+    userId: t
+      .integer()
       .references(() => user.id, { onDelete: "cascade" })
       .notNull(),
-    productId: integer()
+    productId: t
+      .integer()
       .references(() => product.id, { onDelete: "cascade" })
       .notNull(),
-  },
+  }),
   (t) => [primaryKey({ name: "id", columns: [t.userId, t.productId] })],
 );

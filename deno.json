@@ -10,11 +10,11 @@
     "db:seed": "deno task -f @freebies/db db:seed"
   },
   "imports": {
-    "@std/fs": "jsr:@std/fs@^1.0.23",
+    "@std/fs": "jsr:@std/fs@^1.0.24",
     "neverthrow": "npm:neverthrow@^8.2.0",
-    "patchright": "npm:patchright@^1.57.0",
-    "prettier": "npm:prettier@^3.8.1",
+    "patchright": "npm:patchright@^1.61.1",
+    "prettier": "npm:prettier@^3.9.6",
     "prettier-plugin-organize-imports": "npm:prettier-plugin-organize-imports@^4.3.0",
-    "zod": "npm:zod@^4.3.6"
+    "zod": "npm:zod@^4.4.3"
   }
 }
