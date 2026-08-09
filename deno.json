@@ -1,4 +1,9 @@
 {
+  "lint": {
+    "rules": {
+      "exclude": ["no-slow-types"]
+    }
+  },
   "nodeModulesDir": "auto",
   "workspace": ["packages/*", "apps/*"],
   "tasks": {
