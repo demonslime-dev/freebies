@@ -62,7 +62,18 @@ export async function getFreeAssetsFromUnityAssetStore(): Promise<CreateProductI
 function getSaleEndDate(text: string): string {
   const match = text.match(/end\s(.+)\sPT/);
   if (!match) throw new Error("Unable to match sale end date");
-  const date = dayjs.tz(match[1], "MMMM D, YYYY [at] h:mma", "America/Los_Angeles");
+  const dateTime = match[1].replace(/\b(am|pm)\b/i, (meridiem) => meridiem.toUpperCase());
+  let date: dayjs.Dayjs;
+  try {
+    date = dayjs.tz(dateTime, "MMMM D, YYYY [at] h:mm A", "America/Los_Angeles");
+    // FIX: Assetstore showing incorrect year for sale end date
+    // Showing year 2025 instead of 2026
+    const currentYear = new Date().getFullYear();
+    if (date.year() < currentYear) date = date.year(currentYear);
+  } catch {
+    throw new Error(`Unable to parse sale end date: "${match[1]}"`);
+  }
+  if (!date.isValid()) throw new Error(`Unable to parse sale end date: "${match[1]}"`);
   return date.utc().toISOString();
 }
 

@@ -4,8 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: playwright-novnc-ubuntu26
-    # command: "scraper:scrape"
-    command: "claimer:claim"
+    command: "scraper:scrape"
+    # command: "claimer:claim"
     ports:
       # noVNC web interface — open this in your browser
       - "6080:6080"
