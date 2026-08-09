@@ -1,0 +1,36 @@
+services:
+  playwright-novnc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: playwright-novnc-ubuntu26
+    # command: "scraper:scrape"
+    command: "claimer:claim"
+    ports:
+      # noVNC web interface — open this in your browser
+      - "6080:6080"
+      # Optional: direct VNC access (for native VNC clients)
+      - "5900:5900"
+    env_file:
+      - .env
+    environment:
+      - DISPLAY=:99
+      - SCREEN_WIDTH=1366
+      - SCREEN_HEIGHT=768
+      - SCREEN_DEPTH=24
+      - VNC_PORT=5900
+      - NOVNC_PORT=6080
+    # volumes:
+    # Persist test artifacts
+    # Required for Chromium sandbox to work properly in Docker
+    # ipc: host
+    # Keep stdin open for interactive debugging
+    stdin_open: true
+    tty: true
+    # Increase shared memory — browsers need more than Docker's default 64MB
+    shm_size: 2gb
+    # Optional: set CPU/memory limits
+    deploy:
+      resources:
+        limits:
+          memory: 4G

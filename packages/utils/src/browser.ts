@@ -4,7 +4,8 @@ import { chromium } from "patchright";
 async function launchBrowser() {
   return await chromium.launch({
     channel: "chrome",
-    headless: true,
+    headless: false,
+    args: ["--start-maximized"],
   });
 }
 
