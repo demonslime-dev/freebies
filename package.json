@@ -1,0 +1,22 @@
+{
+  "name": "freebies",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "scraper:scrape": "pnpm --filter @freebies/scraper scrape",
+    "claimer:claim": "pnpm --filter @freebies/claimer claim",
+    "db:studio": "pnpm --filter @freebies/db db:studio",
+    "db:reset": "pnpm --filter @freebies/db db:reset",
+    "db:push": "pnpm --filter @freebies/db db:push",
+    "db:seed": "pnpm --filter @freebies/db db:seed",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "prettier": "^3.9.10",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "tsx": "catalog:",
+    "typescript": "^7.0.2"
+  }
+}

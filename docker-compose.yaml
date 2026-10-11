@@ -1,16 +1,11 @@
 services:
-  playwright-novnc:
+  freebies:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: playwright-novnc-ubuntu26
+    container_name: freebies
     command: "scraper:scrape"
-    # command: "claimer:claim"
-    ports:
-      # noVNC web interface — open this in your browser
-      - "6080:6080"
-      # Optional: direct VNC access (for native VNC clients)
-      - "5900:5900"
+    network_mode: "host"
     env_file:
       - .env
     environment:

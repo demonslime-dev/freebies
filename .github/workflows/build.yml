@@ -1,0 +1,20 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  DATABASE_URL: ${{secrets.DATABASE_URL}}
+  MAIL_AUTH_USER: ${{secrets.MAIL_AUTH_USER}}
+  MAIL_AUTH_PASS: ${{secrets.MAIL_AUTH_PASS}}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6

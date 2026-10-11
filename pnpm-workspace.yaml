@@ -1,0 +1,12 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+
+catalog:
+  tsx: ^4.23.15
+  zod: ^4.6.5
+  patchright: ^1.63.0
+  neverthrow: ^8.2.0
+
+allowBuilds:
+  esbuild: true

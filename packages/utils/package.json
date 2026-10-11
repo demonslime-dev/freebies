@@ -1,0 +1,16 @@
+{
+  "name": "@freebies/utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@freebies/db": "workspace:*",
+    "nodemailer": "^10.1.0",
+    "patchright": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^8.0.2"
+  }
+}

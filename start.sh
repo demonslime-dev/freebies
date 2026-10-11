@@ -98,7 +98,7 @@ echo "  🔌 Direct VNC:   vnc://localhost:${VNC_PORT} (no password)"
 echo "  🖥️  Display:       :${DISPLAY_NUM}"
 echo ""
 echo "  To run tests:"
-echo "    docker exec -it <container> npx playwright test --headed"
+echo "    docker exec -it <container> pnpm exec playwright test --headed"
 echo "=========================================="
 echo ""
 
@@ -110,5 +110,5 @@ if [ $# -eq 0 ] || [ "$1" = "tail" ]; then
     wait
 else
     echo "Executing: $@"
-    exec deno task "$@"
+    exec pnpm run "$@"
 fi
