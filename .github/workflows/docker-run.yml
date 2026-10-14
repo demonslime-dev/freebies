@@ -86,7 +86,7 @@ jobs:
 
       - name: Run scraper
         if: github.event.inputs.command == '' || github.event.inputs.command == 'all' || github.event.inputs.command == 'scraper:scrape'
-        run: timeout -k 2m 40m docker run $DOCKER_ARGS -e DATABASE_URL "$IMAGE:$TAG" scraper:scrape
+        run: timeout -k 2m 40m docker run $DOCKER_ARGS -e DATABASE_URL -e MAIL_AUTH_USER -e MAIL_AUTH_PASS "$IMAGE:$TAG" scraper:scrape
 
       - name: Run claimer
         if: github.event.inputs.command == '' || github.event.inputs.command == 'all' || github.event.inputs.command == 'claimer:claim'
