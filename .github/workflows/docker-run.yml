@@ -1,0 +1,93 @@
+name: Docker Run
+
+on:
+  # schedule:
+  #   # Daily at 00:00 and 12:00 UTC
+  #   - cron: "0 0,12 * * *"
+  workflow_dispatch:
+    inputs:
+      command:
+        description: Container command to run
+        type: choice
+        default: all
+        options:
+          - all
+          - scraper:scrape
+          - claimer:claim
+
+# packages: read is required to pull the private image from GHCR
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: docker-run
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+  TAG: latest
+  # Mirrors docker-compose.yaml: host networking, big /dev/shm, 4G cap
+  DOCKER_ARGS: >-
+    --rm
+    --network host
+    --shm-size=2g
+    --memory=4g
+    -e DISPLAY=:99
+    -e SCREEN_WIDTH=1366
+    -e SCREEN_HEIGHT=768
+    -e SCREEN_DEPTH=24
+    -e VNC_PORT=5900
+    -e NOVNC_PORT=6080
+
+jobs:
+  run:
+    name: Scrape + Claim
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      MAIL_AUTH_USER: ${{ secrets.MAIL_AUTH_USER }}
+      MAIL_AUTH_PASS: ${{ secrets.MAIL_AUTH_PASS }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check required secrets
+        run: |
+          missing=()
+          for key in DATABASE_URL MAIL_AUTH_USER MAIL_AUTH_PASS; do
+            if [ -z "${!key}" ]; then missing+=("$key"); fi
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Pull image
+        id: pull
+        continue-on-error: true
+        run: docker pull "$IMAGE:$TAG"
+
+      # Fallback: build from the repo if the pushed image is not available
+      - name: Build image (pull failed)
+        if: steps.pull.outcome == 'failure'
+        run: docker build -t "$IMAGE:$TAG" .
+
+      - name: Container info
+        run: docker image inspect "$IMAGE:$TAG" --format '{{.Id}} {{.Size}}'
+
+      - name: Run scraper
+        if: github.event.inputs.command == '' || github.event.inputs.command == 'all' || github.event.inputs.command == 'scraper:scrape'
+        run: timeout -k 2m 40m docker run $DOCKER_ARGS -e DATABASE_URL "$IMAGE:$TAG" scraper:scrape
+
+      - name: Run claimer
+        if: github.event.inputs.command == '' || github.event.inputs.command == 'all' || github.event.inputs.command == 'claimer:claim'
+        run: timeout -k 2m 40m docker run $DOCKER_ARGS -e DATABASE_URL -e MAIL_AUTH_USER -e MAIL_AUTH_PASS "$IMAGE:$TAG" claimer:claim

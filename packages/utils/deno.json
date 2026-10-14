@@ -1,7 +1,0 @@
-{
-  "name": "@freebies/utils",
-  "exports": "./src/index.ts",
-  "imports": {
-    "nodemailer": "npm:nodemailer@^7.0.13"
-  }
-}

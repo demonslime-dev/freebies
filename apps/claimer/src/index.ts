@@ -8,7 +8,8 @@ import {
 } from "@freebies/db";
 import type { Product, StorePlatform } from "@freebies/db/types";
 import { AlreadyClaimedError, createBrowserContext, NotClaimable, notifyFailure, notifySuccess } from "@freebies/utils";
-import { expandGlob } from "@std/fs";
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
 import { fromPromise } from "neverthrow";
 import type { Claimer } from "./types.ts";
 
@@ -17,8 +18,9 @@ const groupedProducts = Map.groupBy(productsToClaim, (product) => product.platfo
 const users = await db.query.user.findMany({ with: { storeAccounts: true, claimedProducts: true } });
 
 const claimers = new Map<StorePlatform, Claimer>();
-for await (const file of expandGlob("./sources/*.ts", { root: import.meta.dirname })) {
-  const module = await import(file.path);
+const sourceFiles = await readdir(join(import.meta.dirname, "sources"), { withFileTypes: true });
+for (const file of sourceFiles.filter((entry) => entry.name.endsWith(".ts") && entry.name !== "types.ts")) {
+  const module = await import(join(import.meta.dirname, "sources", file.name));
   const claimer: Claimer = module.default;
   claimers.set(claimer.platform, claimer);
 }

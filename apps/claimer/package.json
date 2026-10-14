@@ -1,0 +1,20 @@
+{
+  "name": "@freebies/claimer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "claim": "tsx --env-file-if-exists=.env src/index.ts"
+  },
+  "dependencies": {
+    "@freebies/db": "workspace:*",
+    "@freebies/utils": "workspace:*",
+    "neverthrow": "catalog:",
+    "otplib": "^13.5.0",
+    "patchright": "catalog:"
+  },
+  "devDependencies": {
+    "tsx": "catalog:"
+  }
+}

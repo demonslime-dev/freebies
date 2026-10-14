@@ -1,8 +1,4 @@
-# =============================================================================
-# Playwright + noVNC on Ubuntu 26.04 LTS (Resolute Raccoon)
-# =============================================================================
-# FROM mcr.microsoft.com/playwright:v1.62.0-resolute
-FROM denoland/deno:ubuntu-2.9.5
+FROM ubuntu:26.04
 
 # Prevent interactive apt prompts
 ENV DEBIAN_FRONTEND=noninteractive
@@ -22,6 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Browser-based VNC client
     novnc \
     # Process control utilities
+    ca-certificates \
     supervisor \
     net-tools \
     curl \
@@ -33,7 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # The novnc package installs to /usr/share/novnc on Ubuntu 26.04
 # Create an index.html symlink for cleaner URLs
 RUN if [ -f /usr/share/novnc/vnc.html ]; then \
-      ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html; \
+    ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html; \
     fi
 
 # =============================================================================
@@ -45,36 +42,43 @@ ENV SCREEN_HEIGHT=1080
 ENV SCREEN_DEPTH=24
 
 # =============================================================================
-# 4. APPLICATION SETUP
+# 4. INSTALL NODE.JS & PLAYWRIGHT BROWSER
+# =============================================================================
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && npm install -g pnpm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Chromium + system deps using the project's own playwright version
+RUN pnpm dlx patchright install --with-deps chrome
+
+# =============================================================================
+# 5. SET WORKING DIRECTORY AND COPY APP FILES
 # =============================================================================
 WORKDIR /app
 
-# Copy package files first for optimal Docker layer caching
-# Copy all deno.json / deno.lock recursively, preserving their directory
-# structure (apps/*, packages/*, root). --parents is required: plain COPY
-# globs use Go filepath.Match, where `**` is NOT recursive.
-COPY --parents **/deno.json **/deno.lock ./
-RUN deno install
-RUN deno run -A patchright install chrome --with-deps
-
-# Copy project source
+# Copy package files first for optimal Docker layer caching.
+# --parents is required: plain COPY globs use Go filepath.Match,
+# where `**` is NOT recursive.
+COPY --parents **/package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 COPY . .
 
 # =============================================================================
-# 5. STARTUP SCRIPT
+# 6. STARTUP SCRIPT
 # =============================================================================
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 # =============================================================================
-# 6. EXPOSE PORTS
+# 7. EXPOSE PORTS
 # =============================================================================
 # 6080 = noVNC web interface (access via browser)
 # 5900 = Direct VNC connection (optional, for native VNC clients)
 EXPOSE 6080 5900
 
 # =============================================================================
-# 7. ENTRYPOINT
+# 8. ENTRYPOINT
 # =============================================================================
 ENTRYPOINT ["/start.sh"]
-CMD ["tail", "-f", "/dev/null"]
+CMD ["scraper:scrape"]

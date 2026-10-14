@@ -1,11 +1,13 @@
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
 import { saveProduct } from "@freebies/db";
 import type { CreateProductInput } from "@freebies/db/types";
-import { expandGlob } from "@std/fs";
 import type { Scraper } from "./types.ts";
 
 let products: CreateProductInput[] = [];
-for await (const file of expandGlob("./sources/*.ts", { root: import.meta.dirname })) {
-  const module = await import(file.path);
+const sourceFiles = await readdir(join(import.meta.dirname, "sources"), { withFileTypes: true });
+for (const file of sourceFiles.filter((entry) => entry.name.endsWith(".ts") && entry.name !== "types.ts")) {
+  const module = await import(join(import.meta.dirname, "sources", file.name));
   const scraper: Scraper = module.default;
   // For testing purpose
   // if (scraper.platform !== "Unity") continue;
