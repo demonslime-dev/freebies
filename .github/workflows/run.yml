@@ -1,9 +1,9 @@
 name: Docker Run
 
 on:
-  # schedule:
-  #   # Daily at 00:00 and 12:00 UTC
-  #   - cron: "0 0,12 * * *"
+  schedule:
+    # Daily at 00:00 and 12:00 UTC
+    - cron: "0 0,12 * * *"
   workflow_dispatch:
     inputs:
       command:
