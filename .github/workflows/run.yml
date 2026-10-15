@@ -14,6 +14,10 @@ on:
           - all
           - scraper:scrape
           - claimer:claim
+      vnc:
+        description: Expose noVNC through a Cloudflare tunnel
+        type: boolean
+        default: true
 
 # packages: read is required to pull the private image from GHCR
 permissions:
@@ -39,6 +43,7 @@ env:
     -e SCREEN_DEPTH=24
     -e VNC_PORT=5900
     -e NOVNC_PORT=6080
+  NOVNC_PORT: 6080
 
 jobs:
   run:
@@ -84,6 +89,63 @@ jobs:
       - name: Container info
         run: docker image inspect "$IMAGE:$TAG" --format '{{.Id}} {{.Size}}'
 
+      # Quick tunnels need no account: cloudflared prints an ephemeral
+      # https://<random>.trycloudflare.com URL that proxies to localhost:6080
+      # (the container uses --network host, so the runner sees noVNC directly).
+      - name: Install cloudflared
+        if: github.event.inputs.vnc != 'false'
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            -o "$RUNNER_TEMP/cloudflared"
+          chmod +x "$RUNNER_TEMP/cloudflared"
+          "$RUNNER_TEMP/cloudflared" --version
+
+      - name: Start Cloudflare tunnel
+        if: github.event.inputs.vnc != 'false'
+        env:
+          CF_TUNNEL_TOKEN: ${{ secrets.CF_TUNNEL_TOKEN }}
+          VNC_AUTH_USER: ${{ secrets.VNC_AUTH_USER }}
+          VNC_AUTH_PASS: ${{ secrets.VNC_AUTH_PASS }}
+          CF_PUBLIC_URL: ${{ vars.CF_PUBLIC_URL }}
+        run: |
+          args=( --no-autoupdate )
+          if [ -n "$CF_TUNNEL_TOKEN" ]; then
+            # Named tunnel (remote access / hostname configured in the CF dashboard)
+            args+=( tunnel --token "$CF_TUNNEL_TOKEN" )
+          else
+            args+=( tunnel --url "http://localhost:${NOVNC_PORT}" )
+            # Quick tunnels are public and unauthenticated by default
+            if [ -n "$VNC_AUTH_USER" ] && [ -n "$VNC_AUTH_PASS" ]; then
+              args+=( --basic-auth "${VNC_AUTH_USER}:${VNC_AUTH_PASS}" )
+            fi
+          fi
+          nohup "$RUNNER_TEMP/cloudflared" "${args[@]}" > "$RUNNER_TEMP/cloudflared.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/cloudflared.pid"
+
+          url=""
+          for i in {1..30}; do
+            url=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$RUNNER_TEMP/cloudflared.log" | head -1)
+            [ -n "$url" ] && break
+            sleep 2
+          done
+          [ -z "$url" ] && url="${CF_PUBLIC_URL:-}"
+          if [ -z "$url" ]; then
+            echo "::error::Cloudflare tunnel URL not found"
+            cat "$RUNNER_TEMP/cloudflared.log"
+            exit 1
+          fi
+
+          link="$url/vnc.html?autoconnect=true"
+          echo "noVNC: $link"
+          echo "::notice::noVNC live view: $link"
+          {
+            echo '## 🖥️ noVNC live view'
+            echo ''
+            echo "[Open noVNC]($link)"
+            echo ''
+            echo 'The URL dies with the job (quick tunnels are ephemeral).'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run scraper
         if: github.event.inputs.command == '' || github.event.inputs.command == 'all' || github.event.inputs.command == 'scraper:scrape'
         run: timeout -k 2m 40m docker run $DOCKER_ARGS -e DATABASE_URL -e MAIL_AUTH_USER -e MAIL_AUTH_PASS "$IMAGE:$TAG" scraper:scrape
@@ -91,3 +153,11 @@ jobs:
       - name: Run claimer
         if: github.event.inputs.command == '' || github.event.inputs.command == 'all' || github.event.inputs.command == 'claimer:claim'
         run: timeout -k 2m 40m docker run $DOCKER_ARGS -e DATABASE_URL -e MAIL_AUTH_USER -e MAIL_AUTH_PASS "$IMAGE:$TAG" claimer:claim
+
+      - name: Stop Cloudflare tunnel
+        if: always() && github.event.inputs.vnc != 'false'
+        run: |
+          if [ -f "$RUNNER_TEMP/cloudflared.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/cloudflared.pid")" 2>/dev/null || true
+          fi
+          tail -40 "$RUNNER_TEMP/cloudflared.log" 2>/dev/null || true
