@@ -4,7 +4,7 @@ import type { BrowserContext, Page } from "patchright";
 import type { Claimer, UserCredentials } from "../types.ts";
 
 const authUrl = "https://id.unity.com/en";
-const authRedirectUrl = "https://id.unity.com/en/security";
+const authRedirectUrl = "https://id.unity.com/en/subscriptions";
 
 async function isAuthenticated(page: Page): Promise<boolean>;
 async function isAuthenticated(context: BrowserContext): Promise<boolean>;
