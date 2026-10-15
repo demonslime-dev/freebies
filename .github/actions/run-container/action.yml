@@ -184,13 +184,16 @@ runs:
         nohup "$RUNNER_TEMP/cloudflared" "${args[@]}" > "$RUNNER_TEMP/cloudflared.log" 2>&1 &
         echo $! > "$RUNNER_TEMP/cloudflared.pid"
 
-        url=""
+        # grep exits 1 when it finds nothing, and pipefail propagates that into
+        # the assignment, so `url=$(grep ... | head -1)` aborts the step under
+        # set -e on the first iteration - before cloudflared has written the URL.
+        sleep 2
         for i in {1..30}; do
-          url=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$RUNNER_TEMP/cloudflared.log" | head -1)
-          [ -n "$url" ] && break
+          url=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$RUNNER_TEMP/cloudflared.log" | head -1 || true)
+          if [ -n "$url" ]; then break; fi
           sleep 2
         done
-        [ -z "$url" ] && url="${CF_PUBLIC_URL:-}"
+        if [ -z "$url" ]; then url="${CF_PUBLIC_URL:-}"; fi
         if [ -z "$url" ]; then
           echo "::error::Cloudflare tunnel URL not found"
           cat "$RUNNER_TEMP/cloudflared.log"
