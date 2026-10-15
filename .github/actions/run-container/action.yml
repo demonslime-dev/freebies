@@ -1,0 +1,217 @@
+name: Run container command
+description: >
+  Shared setup for a single job: report the egress IP, restore the image from
+  the Actions cache, start the noVNC tunnel, run one container command, then
+  tear the tunnel down. Each job that uses this action gets its own runner VM,
+  so scraper and claimer egress from different IPs while sharing this code.
+
+inputs:
+  command:
+    description: Container command to run (e.g. scraper:scrape)
+    required: true
+  image:
+    description: Container image reference
+    required: true
+  tag:
+    description: Container image tag
+    required: true
+  docker-args:
+    description: Extra docker run arguments
+    required: true
+  vnc:
+    description: Start the noVNC Cloudflare tunnel
+    default: "false"
+  tunnel-token:
+    description: Named-tunnel CF_TUNNEL_TOKEN (empty = quick tunnel)
+    default: ""
+  auth-user:
+    description: Basic-auth user for quick tunnels
+    default: ""
+  auth-pass:
+    description: Basic-auth password for quick tunnels
+    default: ""
+  public-url:
+    description: Fallback tunnel URL to report
+    default: ""
+  novnc-port:
+    description: noVNC port
+    default: "6080"
+
+runs:
+  using: composite
+  steps:
+    - name: Check required secrets
+      shell: bash
+      # Job env is inherited by composite action steps, so these are the real
+      # secret values, not the empty strings the expression context would give
+      # when a secret is missing.
+      run: |
+        missing=()
+        for key in DATABASE_URL MAIL_AUTH_USER MAIL_AUTH_PASS; do
+          if [ -z "${!key}" ]; then missing+=("$key"); fi
+        done
+        if [ ${#missing[@]} -gt 0 ]; then
+          echo "::error::Missing secrets: ${missing[*]}"
+          exit 1
+        fi
+
+    # What the target site sees. Compare this between the scraper and claimer
+    # jobs: a different ip with the same asn.org means you only got a new
+    # address inside the same GitHub/Azure (AS8075) runner pool.
+    - name: Report egress IP
+      shell: bash
+      run: |
+        ipinfo=$(curl -fsSL https://ipinfo.io/json || true)
+        echo "$ipinfo"
+        echo "::notice::Egress IP: $(echo "$ipinfo" | jq -r '.ip + " " + (.org // "")')"
+
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+
+    # The cache key is the registry digest, so a rebuilt image is a cache miss
+    # and a stale image is never loaded.
+    - name: Resolve image digest
+      id: digest
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        TAG: ${{ inputs.tag }}
+      run: |
+        digest=$(docker buildx imagetools inspect "$IMAGE:$TAG" --format '{{json .Digest}}' 2>/dev/null | tr -d '"\n')
+        [ -z "$digest" ] && digest=unknown
+        echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+    - name: Prepare cache dir
+      shell: bash
+      run: mkdir -p "$RUNNER_TEMP"
+
+    - name: Restore cached image
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/image.tar
+        key: docker-image-${{ inputs.tag }}-${{ steps.digest.outputs.digest }}
+
+    - name: Load image from cache
+      if: steps.cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: docker load -i "$RUNNER_TEMP/image.tar"
+
+    - name: Pull image (cache miss)
+      if: steps.cache.outputs.cache-hit != 'true'
+      id: pull
+      continue-on-error: true
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        TAG: ${{ inputs.tag }}
+      run: docker pull "$IMAGE:$TAG"
+
+    # Fallback: build from the repo if the pushed image is not available
+    - name: Build image (pull failed)
+      if: steps.cache.outputs.cache-hit != 'true' && steps.pull.outcome == 'failure'
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        TAG: ${{ inputs.tag }}
+      run: docker build -t "$IMAGE:$TAG" .
+
+    # Feeds the cache step above for the next run of this job.
+    - name: Save image for cache
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        TAG: ${{ inputs.tag }}
+      run: docker save -o "$RUNNER_TEMP/image.tar" "$IMAGE:$TAG"
+
+    - name: Container info
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        TAG: ${{ inputs.tag }}
+      run: docker image inspect "$IMAGE:$TAG" --format '{{.Id}} {{.Size}}'
+
+    # Quick tunnels need no account: cloudflared prints an ephemeral
+    # https://<random>.trycloudflare.com URL that proxies to localhost:6080
+    # (the container uses --network host, so the runner sees noVNC directly).
+    - name: Install cloudflared
+      if: inputs.vnc == 'true'
+      shell: bash
+      run: |
+        curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+          -o "$RUNNER_TEMP/cloudflared"
+        chmod +x "$RUNNER_TEMP/cloudflared"
+        "$RUNNER_TEMP/cloudflared" --version
+
+    - name: Start Cloudflare tunnel
+      if: inputs.vnc == 'true'
+      shell: bash
+      env:
+        CF_TUNNEL_TOKEN: ${{ inputs.tunnel-token }}
+        VNC_AUTH_USER: ${{ inputs.auth-user }}
+        VNC_AUTH_PASS: ${{ inputs.auth-pass }}
+        CF_PUBLIC_URL: ${{ inputs.public-url }}
+        NOVNC_PORT: ${{ inputs.novnc-port }}
+      run: |
+        args=( --no-autoupdate )
+        if [ -n "$CF_TUNNEL_TOKEN" ]; then
+          # Named tunnel (remote access / hostname configured in the CF dashboard)
+          args+=( tunnel --token "$CF_TUNNEL_TOKEN" )
+        else
+          args+=( tunnel --url "http://localhost:${NOVNC_PORT}" )
+          # Quick tunnels are public and unauthenticated by default
+          if [ -n "$VNC_AUTH_USER" ] && [ -n "$VNC_AUTH_PASS" ]; then
+            args+=( --basic-auth "${VNC_AUTH_USER}:${VNC_AUTH_PASS}" )
+          fi
+        fi
+
+        nohup "$RUNNER_TEMP/cloudflared" "${args[@]}" > "$RUNNER_TEMP/cloudflared.log" 2>&1 &
+        echo $! > "$RUNNER_TEMP/cloudflared.pid"
+
+        url=""
+        for i in {1..30}; do
+          url=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' "$RUNNER_TEMP/cloudflared.log" | head -1)
+          [ -n "$url" ] && break
+          sleep 2
+        done
+        [ -z "$url" ] && url="${CF_PUBLIC_URL:-}"
+        if [ -z "$url" ]; then
+          echo "::error::Cloudflare tunnel URL not found"
+          cat "$RUNNER_TEMP/cloudflared.log"
+          exit 1
+        fi
+
+        link="$url/vnc.html?autoconnect=true"
+        echo "noVNC: $link"
+        echo "::notice::noVNC live view: $link"
+        {
+          echo '## 🖥️ noVNC live view'
+          echo ''
+          echo "[Open noVNC]($link)"
+          echo ''
+          echo 'The URL dies with the job (quick tunnels are ephemeral).'
+        } >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Run ${{ inputs.command }}
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        TAG: ${{ inputs.tag }}
+        DOCKER_ARGS: ${{ inputs.docker-args }}
+      run: timeout -k 2m 40m docker run $DOCKER_ARGS -e DATABASE_URL -e MAIL_AUTH_USER -e MAIL_AUTH_PASS "$IMAGE:$TAG" "${{ inputs.command }}"
+
+    # Teardown lives here (not in the job) so both jobs share it. `if: always()`
+    # keeps it running when the container command fails.
+    - name: Stop Cloudflare tunnel
+      if: always() && inputs.vnc == 'true'
+      shell: bash
+      run: |
+        if [ -f "$RUNNER_TEMP/cloudflared.pid" ]; then
+          kill "$(cat "$RUNNER_TEMP/cloudflared.pid")" 2>/dev/null || true
+        fi
+        tail -40 "$RUNNER_TEMP/cloudflared.log" 2>/dev/null || true
