@@ -80,17 +80,27 @@ runs:
       env:
         IMAGE: ${{ inputs.image }}
         TAG: ${{ inputs.tag }}
+      # GitHub runs steps as `bash --noprofile --norc -e -o pipefail`. With
+      # pipefail, `cmd 2>/dev/null | tr` returns cmd's failure, so the
+      # assignment aborts the whole step under set -e - and 2>/dev/null hides
+      # the reason. Keep stderr visible and neutralise the failure with || true.
       run: |
-        digest=$(docker buildx imagetools inspect "$IMAGE:$TAG" --format '{{json .Digest}}' 2>/dev/null | tr -d '"\n')
-        [ -z "$digest" ] && digest=unknown
-        echo "digest=$digest" >> "$GITHUB_OUTPUT"
+        digest=$(docker buildx imagetools inspect "$IMAGE:$TAG" --format '{{json .Digest}}' | tr -d '"\n' || true)
+        if [ -z "$digest" ]; then
+          echo "::warning::Could not resolve the image digest, skipping the image cache"
+          echo "digest=" >> "$GITHUB_OUTPUT"
+        else
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Prepare cache dir
+      if: steps.digest.outputs.digest != ''
       shell: bash
       run: mkdir -p "$RUNNER_TEMP"
 
     - name: Restore cached image
       id: cache
+      if: steps.digest.outputs.digest != ''
       uses: actions/cache@v4
       with:
         path: ${{ runner.temp }}/image.tar
@@ -120,9 +130,10 @@ runs:
         TAG: ${{ inputs.tag }}
       run: docker build -t "$IMAGE:$TAG" .
 
-    # Feeds the cache step above for the next run of this job.
+    # Feeds the cache step above for the next run of this job. Only worth doing
+    # when the cache step exists, otherwise the tar is written and never saved.
     - name: Save image for cache
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache.outputs.cache-hit != 'true' && steps.digest.outputs.digest != ''
       shell: bash
       env:
         IMAGE: ${{ inputs.image }}
