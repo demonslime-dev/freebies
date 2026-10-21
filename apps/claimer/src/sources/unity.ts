@@ -34,18 +34,24 @@ async function authenticate({ email, password, authSecret }: UserCredentials, co
   const page = authPage ?? (await context.newPage());
   if (!authPage) await page.goto(authUrl);
 
-  await page.getByPlaceholder("Email").fill(email);
-  await page.getByPlaceholder("Password").fill(password);
-  await page.click("input[type=submit]");
+  await page.locator("input[type=email]").fill(email);
+  await page.click("button[type=submit]");
+  await page.locator("input[type=password]").fill(password);
+  await page.click("button[type=submit]");
   await page.waitForLoadState("load");
 
-  const pageTitle = await page.title();
-  if (pageTitle.includes("Verify your code")) {
+  const tfa = await page
+    .waitForURL("https://login.unity.com/en/sign-in/tfa", { timeout: 10 * 1000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (tfa) {
     if (authSecret) {
       const guardrails = createGuardrails({ MIN_SECRET_BYTES: 10 });
       const otp = await generate({ secret: authSecret, guardrails });
-      await page.fill("input.verify_code", otp);
-      await page.click("input[type=submit]");
+      // await page.getByPlaceholder("Authentication code").fill(otp);
+      await page.fill("#code", otp);
+      await page.click("button[type=submit]");
     } else throw new Error("OTP required");
   }
 
