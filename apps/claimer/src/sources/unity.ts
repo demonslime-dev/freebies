@@ -34,8 +34,8 @@ async function authenticate({ email, password, authSecret }: UserCredentials, co
   const page = authPage ?? (await context.newPage());
   if (!authPage) await page.goto(authUrl);
 
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
+  await page.getByPlaceholder("Email").fill(email);
+  await page.getByPlaceholder("Password").fill(password);
   await page.click("input[type=submit]");
   await page.waitForLoadState("load");
 

@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: freebies
     command: "scraper:scrape"
+    # command: "claimer:claim"
     network_mode: "host"
     env_file:
       - .env
